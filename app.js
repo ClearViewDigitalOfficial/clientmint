@@ -1,6 +1,6 @@
 // Configuration
 const API_ENDPOINT = '/api/generate-website';
-const GENERATION_TIMEOUT = 60000; // 60 seconds
+const GENERATION_TIMEOUT = 120000; // 60 seconds
 
 // User data
 let userData = {
