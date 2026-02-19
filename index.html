@@ -467,6 +467,48 @@
             margin-bottom: 1rem;
         }
 
+        .btn-google {
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            color: #1E293B;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-google:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .auth-divider hr {
+            flex: 1;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .auth-divider span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
         .btn-auth {
             width: 100%;
             padding: 1rem;
@@ -572,6 +614,23 @@
             <p id="authSubtitle">Sign up to generate your free website</p>
             <div class="auth-error" id="authError"></div>
             <div class="auth-success" id="authSuccess"></div>
+
+            <!-- Google Sign-In Button -->
+            <button class="btn-google" onclick="signInWithGoogle()">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+                    <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+                    <path fill="#FBBC05" d="M4.5 10.48A4.8 4.8 0 0 1 4.5 7.5V5.43H1.83a8 8 0 0 0 0 7.14z"/>
+                    <path fill="#EA4335" d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8 8 0 0 0 1.83 5.43L4.5 7.5c.67-2 2.52-3.92 4.48-3.92z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <!-- Divider -->
+            <div class="auth-divider">
+                <hr><span>or continue with email</span><hr>
+            </div>
+
             <input type="email" id="authEmail" placeholder="Your email address">
             <input type="password" id="authPassword" placeholder="Password (min 6 characters)">
             <button class="btn-auth" id="authBtn">Create Account & Generate</button>
