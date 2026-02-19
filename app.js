@@ -24,6 +24,20 @@ window.addEventListener('load', async () => {
     }
 });
 
+// Handle Google OAuth redirect callback
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+        currentUser = session.user;
+        showUserInHeader(session.user.email);
+        document.getElementById('authModal').classList.remove('active');
+
+        // If they came from Google OAuth and form data exists, start generation
+        if (userData.businessName && userData.businessDescription) {
+            startGeneration();
+        }
+    }
+});
+
 function showUserInHeader(email) {
     document.getElementById('userEmailDisplay').textContent = email;
     document.getElementById('signOutBtn').style.display = 'block';
@@ -64,6 +78,21 @@ function showAuthSuccess(message) {
 function clearAuthMessages() {
     document.getElementById('authError').classList.remove('active');
     document.getElementById('authSuccess').classList.remove('active');
+}
+
+// Google Sign-In
+async function signInWithGoogle() {
+    try {
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) throw error;
+    } catch (error) {
+        showAuthError('Google sign-in failed: ' + error.message);
+    }
 }
 
 // Main form submission
