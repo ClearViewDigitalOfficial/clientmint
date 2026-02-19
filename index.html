@@ -6,12 +6,9 @@
     <title>ClientMint - Generate Professional Websites in Minutes with AI</title>
     <meta name="description" content="Create stunning, professional websites in under 5 minutes using AI. No coding required. Get your business online today.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #6366F1;
@@ -33,21 +30,17 @@
             overflow-x: hidden;
         }
 
-        /* Animated Background with Example Websites */
         .bg-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 0;
             overflow: hidden;
         }
 
         .gradient-bg {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             background: linear-gradient(125deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
         }
 
@@ -60,19 +53,15 @@
         }
 
         .orb-1 {
-            width: 500px;
-            height: 500px;
+            width: 500px; height: 500px;
             background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
-            top: -10%;
-            right: -5%;
+            top: -10%; right: -5%;
         }
 
         .orb-2 {
-            width: 400px;
-            height: 400px;
+            width: 400px; height: 400px;
             background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%);
-            bottom: -10%;
-            left: 10%;
+            bottom: -10%; left: 10%;
             animation-delay: 3s;
         }
 
@@ -83,43 +72,26 @@
             75% { transform: translate(30px, 20px) rotate(3deg); }
         }
 
-        /* Floating Example Website Previews */
         .website-previews {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             opacity: 0.15;
         }
 
         .preview-card {
             position: absolute;
-            width: 300px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 300px; height: 200px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             padding: 1rem;
             backdrop-filter: blur(10px);
             animation: floatPreview 25s ease-in-out infinite;
         }
 
-        .preview-card:nth-child(1) {
-            top: 10%;
-            left: 5%;
-            animation-delay: 0s;
-        }
-
-        .preview-card:nth-child(2) {
-            top: 60%;
-            left: 70%;
-            animation-delay: 5s;
-        }
-
-        .preview-card:nth-child(3) {
-            top: 30%;
-            right: 10%;
-            animation-delay: 10s;
-        }
+        .preview-card:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .preview-card:nth-child(2) { top: 60%; left: 70%; animation-delay: 5s; }
+        .preview-card:nth-child(3) { top: 30%; right: 10%; animation-delay: 10s; }
 
         @keyframes floatPreview {
             0%, 100% { transform: translateY(0px); }
@@ -127,33 +99,29 @@
         }
 
         .preview-mini {
-            width: 100%;
-            height: 30%;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%);
+            width: 100%; height: 30%;
+            background: linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(20,184,166,0.2) 100%);
             border-radius: 6px;
             margin-bottom: 0.5rem;
         }
 
         .preview-text {
-            width: 80%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 80%; height: 8px;
+            background: rgba(255,255,255,0.2);
             border-radius: 4px;
             margin: 0.5rem 0;
         }
 
         .grid-overlay {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             background-image: 
-                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
             background-size: 50px 50px;
             opacity: 0.5;
         }
 
-        /* Main Content */
         .main-container {
             position: relative;
             z-index: 1;
@@ -177,15 +145,40 @@
             background: linear-gradient(135deg, var(--primary-light), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .logo::before {
             content: '⚡';
             font-size: 1.75rem;
             filter: drop-shadow(0 0 10px var(--primary));
+            margin-right: 0.5rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-email {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .btn-signout {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-signout:hover {
+            border-color: var(--primary);
+            color: var(--text);
         }
 
         .hero {
@@ -215,14 +208,8 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .gradient-text {
@@ -243,51 +230,49 @@
             justify-content: center;
             gap: 3rem;
             margin-bottom: 3rem;
-            flex-wrap: wrap;
             animation: fadeInUp 0.8s ease 0.4s both;
         }
 
-        .stat {
-            text-align: center;
-        }
+        .stat { text-align: center; }
 
         .stat-number {
+            display: block;
             font-size: 2.5rem;
-            font-weight: 800;
+            font-weight: 900;
             background: linear-gradient(135deg, var(--primary-light), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: block;
         }
 
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .form-card {
-            background: rgba(30, 41, 59, 0.6);
+            background: rgba(30, 41, 59, 0.8);
             border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 3rem;
-            max-width: 600px;
-            margin: 0 auto;
-            backdrop-filter: blur(40px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
             animation: fadeInUp 0.8s ease 0.6s both;
         }
 
         .form-group {
+            text-align: left;
             margin-bottom: 1.5rem;
         }
 
         label {
             display: block;
-            margin-bottom: 0.75rem;
             font-weight: 600;
-            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         input, textarea {
@@ -296,133 +281,98 @@
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid var(--border);
             border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
             color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
             transition: all 0.3s ease;
         }
 
         input:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
-            background: rgba(15, 23, 42, 0.95);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 0 20px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        input::placeholder, textarea::placeholder {
-            color: var(--text-muted);
-            opacity: 0.6;
-        }
+        textarea { height: 120px; resize: vertical; }
 
         .btn-primary {
             width: 100%;
-            padding: 1.25rem;
+            padding: 1.1rem;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px -10px var(--primary);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 40px -10px var(--primary);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
         }
 
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        /* SCREENS */
+        .screen { display: none; width: 100%; min-height: 100vh; }
+        .screen.active { display: block; }
 
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        /* Loading Screen */
+        /* LOADING SCREEN */
         .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 4rem 2rem;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
         }
 
         .loading-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 2rem;
-            border: 4px solid var(--border);
+            width: 80px; height: 80px;
+            border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .progress-bar-container {
-            max-width: 500px;
-            margin: 2rem auto;
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 12px;
-            height: 12px;
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
             overflow: hidden;
-            border: 1px solid var(--border);
         }
 
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
             width: 0%;
-            transition: width 0.5s ease;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            transition: width 1s ease;
         }
 
-        /* Editor Screen */
+        /* EDITOR SCREEN */
         .editor-screen {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: 300px 1fr;
             height: 100vh;
         }
 
         .sidebar {
-            background: rgba(30, 41, 59, 0.95);
+            background: rgba(15, 23, 42, 0.95);
             border-right: 1px solid var(--border);
             padding: 2rem;
             overflow-y: auto;
-            backdrop-filter: blur(40px);
         }
 
         .progress-item {
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(30, 41, 59, 0.5);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1rem;
@@ -430,43 +380,20 @@
             transition: all 0.3s ease;
         }
 
-        .progress-item.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-        }
-
         .progress-item.complete {
             background: rgba(16, 185, 129, 0.1);
             border-color: var(--success);
         }
 
-        .progress-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+        .progress-title { font-weight: 600; margin-bottom: 0.5rem; }
+        .progress-description { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
 
-        .progress-description {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .preview-area {
-            background: #f5f5f5;
-            position: relative;
-        }
-
-        .preview-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .preview-area { background: #f5f5f5; position: relative; }
+        .preview-frame { width: 100%; height: 100%; border: none; }
 
         .upgrade-bar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 0; left: 0; right: 0;
             background: rgba(30, 41, 59, 0.95);
             border-top: 1px solid var(--border);
             padding: 1.5rem 2rem;
@@ -493,6 +420,113 @@
             box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
         }
 
+        /* AUTH MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1E293B;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            margin: 1rem;
+            position: relative;
+        }
+
+        .modal h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #FFFFFF, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .modal input {
+            margin-bottom: 1rem;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .auth-switch {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .auth-switch a {
+            color: var(--primary-light);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-switch a:hover { text-decoration: underline; }
+
+        .auth-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #FCA5A5;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .auth-error.active { display: block; }
+
+        .auth-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #6EE7B7;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .auth-success.active { display: block; }
+
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
             .form-card { padding: 2rem 1.5rem; }
@@ -511,7 +545,6 @@
         <div class="gradient-bg"></div>
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
-        
         <div class="website-previews">
             <div class="preview-card">
                 <div class="preview-mini"></div>
@@ -529,8 +562,23 @@
                 <div class="preview-text" style="width: 50%;"></div>
             </div>
         </div>
-        
         <div class="grid-overlay"></div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="modal-overlay">
+        <div class="modal">
+            <h2 id="authTitle">Create Account</h2>
+            <p id="authSubtitle">Sign up to generate your free website</p>
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
+            <input type="email" id="authEmail" placeholder="Your email address">
+            <input type="password" id="authPassword" placeholder="Password (min 6 characters)">
+            <button class="btn-auth" id="authBtn">Create Account & Generate</button>
+            <div class="auth-switch" id="authSwitch">
+                Already have an account? <a onclick="toggleAuthMode()">Sign in</a>
+            </div>
+        </div>
     </div>
 
     <!-- HOME SCREEN -->
@@ -538,18 +586,15 @@
         <div class="main-container">
             <div class="header">
                 <div class="logo">ClientMint</div>
+                <div class="header-right">
+                    <span class="user-email" id="userEmailDisplay"></span>
+                    <button class="btn-signout" id="signOutBtn" style="display:none" onclick="signOut()">Sign Out</button>
+                </div>
             </div>
-
             <div class="hero">
                 <div class="hero-content">
-                    <h1>
-                        Build <span class="gradient-text">Perfect Websites</span><br>
-                        With AI in Minutes
-                    </h1>
-                    <p class="subtitle">
-                        No coding. No templates. Just describe your business and watch AI create a stunning, 100% unique professional website instantly.
-                    </p>
-
+                    <h1>Build <span class="gradient-text">Perfect Websites</span><br>With AI in Minutes</h1>
+                    <p class="subtitle">No coding. No templates. Just describe your business and watch AI create a stunning, 100% unique professional website instantly.</p>
                     <div class="stats">
                         <div class="stat">
                             <span class="stat-number">52,847</span>
@@ -564,22 +609,17 @@
                             <span class="stat-label">Rating</span>
                         </div>
                     </div>
-
                     <div class="form-card">
                         <form id="mainForm">
                             <div class="form-group">
                                 <label for="businessName">Business Name</label>
                                 <input type="text" id="businessName" placeholder="e.g., Tony's Pizza" required>
                             </div>
-
                             <div class="form-group">
                                 <label for="businessDescription">Describe Your Business</label>
                                 <textarea id="businessDescription" placeholder="Family-owned Italian restaurant in Brooklyn serving authentic Neapolitan pizza with fresh ingredients..." required></textarea>
                             </div>
-
-                            <button type="submit" class="btn-primary" id="generateBtn">
-                                ✨ Create My Website
-                            </button>
+                            <button type="submit" class="btn-primary" id="generateBtn">✨ Create My Website</button>
                         </form>
                     </div>
                 </div>
@@ -590,9 +630,7 @@
     <!-- LOADING SCREEN -->
     <div id="loadingScreen" class="screen">
         <div class="main-container">
-            <div class="header">
-                <div class="logo">ClientMint</div>
-            </div>
+            <div class="header"><div class="logo">ClientMint</div></div>
             <div class="hero">
                 <div class="loading-screen">
                     <div class="loading-icon"></div>
@@ -601,9 +639,7 @@
                     <div class="progress-bar-container">
                         <div class="progress-bar" id="progressBar"></div>
                     </div>
-                    <p style="color: var(--text-muted); margin-top: 1.5rem; font-size: 0.95rem;">
-                        Generating custom copy, selecting images, and building your site structure
-                    </p>
+                    <p style="color: var(--text-muted); margin-top: 1.5rem; font-size: 0.95rem;">Generating custom copy, selecting images, and building your site structure</p>
                 </div>
             </div>
         </div>
@@ -613,53 +649,33 @@
     <div id="editorScreen" class="screen">
         <div class="editor-screen">
             <div class="sidebar">
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                    Your professional website
-                </p>
-                
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">Your professional website</p>
                 <div class="progress-item complete">
                     <div class="progress-title">✓ Website Generated</div>
-                    <div class="progress-description" id="thinkingText">
-                        Created custom design for your business
-                    </div>
+                    <div class="progress-description" id="thinkingText">Created custom design for your business</div>
                 </div>
-
                 <div class="progress-item complete">
                     <div class="progress-title">✓ Content Written</div>
-                    <div class="progress-description">
-                        SEO-optimized copy tailored to your industry
-                    </div>
+                    <div class="progress-description">SEO-optimized copy tailored to your industry</div>
                 </div>
-
                 <div class="progress-item complete">
                     <div class="progress-title">✓ Images Selected</div>
-                    <div class="progress-description">
-                        High-quality images matched to your business
-                    </div>
+                    <div class="progress-description">High-quality images matched to your business</div>
                 </div>
-
                 <div class="progress-item complete">
                     <div class="progress-title">✓ Ready to Publish</div>
-                    <div class="progress-description">
-                        Your website is ready to go live
-                    </div>
+                    <div class="progress-description">Your website is ready to go live</div>
                 </div>
-
                 <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted);">
-                    <strong>Free Preview Active</strong><br>
-                    Upgrade to publish and edit
+                    <strong>Free Preview Active</strong><br>Upgrade to publish and edit
                 </p>
             </div>
-
             <div class="preview-area">
                 <iframe id="previewFrame" class="preview-frame"></iframe>
             </div>
         </div>
-
         <div class="upgrade-bar">
-            <div style="color: var(--text-muted); font-size: 0.9rem;">
-                🎉 Your website is ready! Publish it online in one click.
-            </div>
+            <div style="color: var(--text-muted); font-size: 0.9rem;">🎉 Your website is ready! Publish it online in one click.</div>
             <button class="btn-upgrade" id="upgradeBtn">Publish My Website - $9/mo</button>
         </div>
     </div>
