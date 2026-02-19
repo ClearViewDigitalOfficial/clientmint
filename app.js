@@ -1,114 +1,187 @@
-// Configuration
-const API_ENDPOINT = '/api/generate-website';
-const GENERATION_TIMEOUT = 120000; // 60 seconds
+// Supabase setup
+const SUPABASE_URL = 'https://lgphbhtizcbmnsaecoje.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncGhiaHRpemNibW5zYWVjb2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTUyOTQsImV4cCI6MjA4NzA5MTI5NH0.8PemFAh7VHxHY4yWVXWqnrYtlHqxPq1kUj2cs0VgAKE';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// User data
+const API_ENDPOINT = '/api/generate-website';
+const GENERATION_TIMEOUT = 120000;
+
 let userData = {
     businessName: '',
     businessDescription: '',
     generatedHTML: ''
 };
 
+let isSignUp = true;
+let currentUser = null;
+
+// Check if user is already logged in on load
+window.addEventListener('load', async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        currentUser = session.user;
+        showUserInHeader(session.user.email);
+    }
+});
+
+function showUserInHeader(email) {
+    document.getElementById('userEmailDisplay').textContent = email;
+    document.getElementById('signOutBtn').style.display = 'block';
+}
+
+async function signOut() {
+    await supabase.auth.signOut();
+    currentUser = null;
+    document.getElementById('userEmailDisplay').textContent = '';
+    document.getElementById('signOutBtn').style.display = 'none';
+}
+
+function toggleAuthMode() {
+    isSignUp = !isSignUp;
+    document.getElementById('authTitle').textContent = isSignUp ? 'Create Account' : 'Welcome Back';
+    document.getElementById('authSubtitle').textContent = isSignUp ? 'Sign up to generate your free website' : 'Sign in to continue';
+    document.getElementById('authBtn').textContent = isSignUp ? 'Create Account & Generate' : 'Sign In & Generate';
+    document.getElementById('authSwitch').innerHTML = isSignUp
+        ? 'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>'
+        : "Don't have an account? <a onclick=\"toggleAuthMode()\">Sign up</a>";
+    clearAuthMessages();
+}
+
+function showAuthError(message) {
+    const el = document.getElementById('authError');
+    el.textContent = message;
+    el.classList.add('active');
+    document.getElementById('authSuccess').classList.remove('active');
+}
+
+function showAuthSuccess(message) {
+    const el = document.getElementById('authSuccess');
+    el.textContent = message;
+    el.classList.add('active');
+    document.getElementById('authError').classList.remove('active');
+}
+
+function clearAuthMessages() {
+    document.getElementById('authError').classList.remove('active');
+    document.getElementById('authSuccess').classList.remove('active');
+}
+
 // Main form submission
 document.getElementById('mainForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     userData.businessName = document.getElementById('businessName').value.trim();
     userData.businessDescription = document.getElementById('businessDescription').value.trim();
-    
-    // Validation
+
     if (!userData.businessName || !userData.businessDescription) {
         alert('Please fill in both fields');
         return;
     }
 
-    if (userData.businessName.length < 2) {
-        alert('Business name must be at least 2 characters');
+    // If user already logged in, go straight to generation
+    if (currentUser) {
+        startGeneration();
         return;
     }
 
-    if (userData.businessDescription.length < 10) {
-        alert('Please provide a more detailed business description (at least 10 characters)');
+    // Show auth modal
+    document.getElementById('authModal').classList.add('active');
+});
+
+// Auth button click
+document.getElementById('authBtn').addEventListener('click', async () => {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value.trim();
+
+    if (!email || !password) {
+        showAuthError('Please enter your email and password');
         return;
     }
-    
-    // Start generation
-    startGeneration();
+
+    if (password.length < 6) {
+        showAuthError('Password must be at least 6 characters');
+        return;
+    }
+
+    document.getElementById('authBtn').textContent = 'Please wait...';
+    document.getElementById('authBtn').disabled = true;
+    clearAuthMessages();
+
+    try {
+        if (isSignUp) {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
+
+            if (data.user && data.session) {
+                // Logged in immediately
+                currentUser = data.user;
+                showUserInHeader(data.user.email);
+                document.getElementById('authModal').classList.remove('active');
+                startGeneration();
+            } else {
+                // Email confirmation required
+                showAuthSuccess('Check your email to confirm your account, then come back and sign in!');
+                document.getElementById('authBtn').textContent = 'Create Account & Generate';
+                document.getElementById('authBtn').disabled = false;
+            }
+        } else {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            currentUser = data.user;
+            showUserInHeader(data.user.email);
+            document.getElementById('authModal').classList.remove('active');
+            startGeneration();
+        }
+    } catch (error) {
+        showAuthError(error.message);
+        document.getElementById('authBtn').textContent = isSignUp ? 'Create Account & Generate' : 'Sign In & Generate';
+        document.getElementById('authBtn').disabled = false;
+    }
 });
 
 async function startGeneration() {
-    console.log('🚀 ClientMint: Starting generation...');
-    console.log('📝 Business:', userData.businessName);
-    console.log('📝 Description length:', userData.businessDescription.length);
-    
     let progressInterval = null;
     let timeoutId = null;
-    
+
     try {
-        // Setup timeout
         const timeoutPromise = new Promise((_, reject) => {
             timeoutId = setTimeout(() => {
-                reject(new Error('Generation timed out after 60 seconds. Please try with a shorter description or try again.'));
+                reject(new Error('Generation timed out after 120 seconds. Please try again.'));
             }, GENERATION_TIMEOUT);
         });
-        
-        // Start API call
+
         const generationPromise = generateWebsiteWithAI();
-        
-        // Show loading screen
+
         showLoadingScreen();
         progressInterval = startProgressAnimation();
-        
-        // Wait for completion or timeout
+
         await Promise.race([generationPromise, timeoutPromise]);
-        
-        // Success - cleanup
+
         clearTimeout(timeoutId);
         if (progressInterval) clearInterval(progressInterval);
-        
-        // Complete progress
+
         document.getElementById('progressBar').style.width = '100%';
-        
-        setTimeout(() => {
-            showEditor();
-        }, 500);
-        
+        setTimeout(() => showEditor(), 500);
+
     } catch (error) {
-        console.error('❌ Generation failed:', error);
-        console.error('Error details:', {
-            message: error.message,
-            type: error.constructor.name,
-            stack: error.stack
-        });
-        
-        // Cleanup
         if (timeoutId) clearTimeout(timeoutId);
         if (progressInterval) clearInterval(progressInterval);
-        
-        // Stop loading
         hideLoadingScreen();
-        
-        // Show error
-        showErrorAlert(error);
-        
-        // Return to home
+        alert('❌ Generation Failed\n\n' + error.message + '\n\nPlease try again.');
         showHomeScreen();
     }
 }
 
 function showLoadingScreen() {
-    console.log('⏳ Showing loading screen');
     document.getElementById('homeScreen').classList.remove('active');
     document.getElementById('loadingScreen').classList.add('active');
 }
 
 function hideLoadingScreen() {
-    console.log('⏹️ Hiding loading screen');
     document.getElementById('loadingScreen').classList.remove('active');
 }
 
 function showHomeScreen() {
-    console.log('🏠 Returning to home screen');
     document.getElementById('homeScreen').classList.add('active');
     document.getElementById('progressBar').style.width = '0%';
 }
@@ -116,175 +189,62 @@ function showHomeScreen() {
 function startProgressAnimation() {
     let progress = 0;
     const progressBar = document.getElementById('progressBar');
-    
     return setInterval(() => {
-        progress += Math.random() * 3;
+        progress += Math.random() * 2;
         if (progress >= 90) progress = 90;
         progressBar.style.width = progress + '%';
     }, 1000);
 }
 
-function showErrorAlert(error) {
-    let message = '❌ Generation Failed\n\n';
-    message += `${error.message}\n\n`;
-    
-    if (error.message.includes('ANTHROPIC_API_KEY not set')) {
-        message += '⚠️ This is a server configuration issue.\n';
-        message += 'Please contact ClientMint support.';
-    } else if (error.message.includes('timeout') || error.message.includes('timed out')) {
-        message += '💡 Suggestion:\n';
-        message += '• Try with a shorter business description\n';
-        message += '• Check your internet connection\n';
-        message += '• Try again in a moment';
-    } else if (error.message.includes('Network error')) {
-        message += '💡 Please check your internet connection and try again.';
-    } else {
-        message += '💡 Please try again. If the problem persists, contact support.';
-    }
-    
-    alert(message);
-}
-
 function showEditor() {
-    console.log('✅ Showing editor screen');
     document.getElementById('loadingScreen').classList.remove('active');
     document.getElementById('editorScreen').classList.add('active');
-    
-    setTimeout(() => {
-        const industry = getIndustryType();
-        document.getElementById('thinkingText').textContent = 
-            `Created professional ${industry} website for ${userData.businessName}`;
-        console.log('📊 Industry detected:', industry);
-    }, 500);
-    
     setTimeout(() => {
         displayGeneratedWebsite();
-    }, 1000);
-}
-
-function getIndustryType() {
-    const desc = userData.businessDescription.toLowerCase();
-    if (desc.includes('restaurant') || desc.includes('food') || desc.includes('pizza') || desc.includes('cafe') || desc.includes('diner')) return 'restaurant';
-    if (desc.includes('barber') || desc.includes('salon') || desc.includes('hair') || desc.includes('spa')) return 'salon';
-    if (desc.includes('gym') || desc.includes('fitness') || desc.includes('trainer') || desc.includes('yoga')) return 'fitness';
-    if (desc.includes('law') || desc.includes('legal') || desc.includes('attorney') || desc.includes('lawyer')) return 'legal';
-    if (desc.includes('shop') || desc.includes('store') || desc.includes('retail')) return 'retail';
-    if (desc.includes('tech') || desc.includes('software') || desc.includes('app')) return 'tech';
-    return 'business';
+    }, 500);
 }
 
 async function generateWebsiteWithAI() {
-    console.log('📡 Calling API endpoint:', API_ENDPOINT);
-    
-    const requestBody = {
-        businessName: userData.businessName,
-        businessDescription: userData.businessDescription
-    };
-    
-    console.log('📤 Sending POST request...');
-    console.log('📋 Request body:', {
-        businessName: requestBody.businessName,
-        descriptionLength: requestBody.businessDescription.length
-    });
-    
     let response;
     try {
         response = await fetch(API_ENDPOINT, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                businessName: userData.businessName,
+                businessDescription: userData.businessDescription
+            })
         });
     } catch (networkError) {
-        console.error('❌ Network error:', networkError);
-        throw new Error(`Network error: ${networkError.message}. Please check your internet connection.`);
+        throw new Error('Network error. Please check your internet connection.');
     }
-    
-    console.log('📥 Response received');
-    console.log('📊 Status:', response.status, response.statusText);
-    console.log('📊 OK:', response.ok);
-    
+
     if (!response.ok) {
-        console.error('❌ Non-OK response status:', response.status);
-        
-        let errorText;
-        try {
-            errorText = await response.text();
-            console.error('❌ Error response body:', errorText);
-        } catch (e) {
-            console.error('❌ Could not read error response');
-            throw new Error(`Server error (${response.status}). Please try again.`);
-        }
-        
+        let errorText = await response.text();
         let errorData;
-        try {
-            errorData = JSON.parse(errorText);
-            console.error('❌ Parsed error:', errorData);
-        } catch (e) {
-            console.error('❌ Could not parse error JSON');
-            throw new Error(`Server error (${response.status}): ${errorText.substring(0, 100)}`);
-        }
-        
-        const errorMessage = errorData.error || errorData.message || `Server error (${response.status})`;
-        throw new Error(errorMessage);
+        try { errorData = JSON.parse(errorText); } catch (e) {}
+        throw new Error(errorData?.message || errorData?.error || `Server error (${response.status})`);
     }
-    
-    let data;
-    try {
-        data = await response.json();
-        console.log('✅ Response parsed successfully');
-        console.log('📏 HTML length:', data.html?.length || 0);
-    } catch (e) {
-        console.error('❌ Failed to parse successful response:', e);
-        throw new Error('Invalid response from server. Please try again.');
-    }
-    
-    if (!data.html) {
-        console.error('❌ No HTML in response');
-        throw new Error('No website generated. Please try again.');
-    }
-    
-    if (data.html.length < 1000) {
-        console.warn('⚠️ Generated HTML seems too short:', data.html.length);
-    }
-    
-    console.log('✅ Website generated successfully');
+
+    const data = await response.json();
+    if (!data.html) throw new Error('No website generated. Please try again.');
     userData.generatedHTML = data.html;
 }
 
 function displayGeneratedWebsite() {
-    console.log('🖼️ Displaying generated website...');
     const iframe = document.getElementById('previewFrame');
-    
     if (!userData.generatedHTML) {
-        console.error('❌ No HTML to display');
-        alert('Error: No website data available. Please try generating again.');
+        alert('Error: No website data. Please try again.');
         return;
     }
-    
-    console.log('📏 Displaying HTML length:', userData.generatedHTML.length);
-    
-    try {
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(userData.generatedHTML);
-        doc.close();
-        
-        console.log('✅ Website displayed in iframe');
-        console.log('🎉 Generation complete!');
-    } catch (error) {
-        console.error('❌ Error displaying website:', error);
-        alert('Error displaying website. Please try again.');
-    }
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(userData.generatedHTML);
+    doc.close();
 }
 
-// Upgrade button
 document.getElementById('upgradeBtn').addEventListener('click', () => {
-    console.log('💳 Upgrade button clicked');
-    // TODO: Implement Stripe checkout
     window.location.href = '/pricing';
 });
 
-console.log('✅ ClientMint app.js loaded');
-console.log('📡 API Endpoint:', API_ENDPOINT);
+console.log('✅ ClientMint loaded with auth');
