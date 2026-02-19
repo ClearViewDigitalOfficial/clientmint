@@ -31,8 +31,15 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
         showUserInHeader(session.user.email);
         document.getElementById('authModal').classList.remove('active');
 
-        // If they came from Google OAuth and form data exists, start generation
-        if (userData.businessName && userData.businessDescription) {
+        // Restore form data from sessionStorage (saved before Google redirect)
+        const savedName = sessionStorage.getItem('pendingBusinessName');
+        const savedDesc = sessionStorage.getItem('pendingBusinessDescription');
+
+        if (savedName && savedDesc) {
+            userData.businessName = savedName;
+            userData.businessDescription = savedDesc;
+            sessionStorage.removeItem('pendingBusinessName');
+            sessionStorage.removeItem('pendingBusinessDescription');
             startGeneration();
         }
     }
@@ -82,6 +89,10 @@ function clearAuthMessages() {
 
 // Google Sign-In
 async function signInWithGoogle() {
+    // Save form data to sessionStorage before redirect — it gets wiped on page reload
+    sessionStorage.setItem('pendingBusinessName', userData.businessName);
+    sessionStorage.setItem('pendingBusinessDescription', userData.businessDescription);
+
     try {
         const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
@@ -142,13 +153,11 @@ document.getElementById('authBtn').addEventListener('click', async () => {
             if (error) throw error;
 
             if (data.user && data.session) {
-                // Logged in immediately
                 currentUser = data.user;
                 showUserInHeader(data.user.email);
                 document.getElementById('authModal').classList.remove('active');
                 startGeneration();
             } else {
-                // Email confirmation required
                 showAuthSuccess('Check your email to confirm your account, then come back and sign in!');
                 document.getElementById('authBtn').textContent = 'Create Account & Generate';
                 document.getElementById('authBtn').disabled = false;
