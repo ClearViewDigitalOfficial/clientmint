@@ -1,7 +1,7 @@
 // Supabase setup
 const SUPABASE_URL = 'https://lgphbhtizcbmnsaecoje.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncGhiaHRpemNibW5zYWVjb2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTUyOTQsImV4cCI6MjA4NzA5MTI5NH0.8PemFAh7VHxHY4yWVXWqnrYtlHqxPq1kUj2cs0VgAKE';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const API_ENDPOINT = '/api/generate-website';
 const GENERATION_TIMEOUT = 120000;
@@ -17,7 +17,7 @@ let currentUser = null;
 
 // Check if user is already logged in on load
 window.addEventListener('load', async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
         currentUser = session.user;
         showUserInHeader(session.user.email);
@@ -30,7 +30,7 @@ function showUserInHeader(email) {
 }
 
 async function signOut() {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     currentUser = null;
     document.getElementById('userEmailDisplay').textContent = '';
     document.getElementById('signOutBtn').style.display = 'none';
@@ -109,7 +109,7 @@ document.getElementById('authBtn').addEventListener('click', async () => {
 
     try {
         if (isSignUp) {
-            const { data, error } = await supabase.auth.signUp({ email, password });
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
             if (error) throw error;
 
             if (data.user && data.session) {
@@ -125,7 +125,7 @@ document.getElementById('authBtn').addEventListener('click', async () => {
                 document.getElementById('authBtn').disabled = false;
             }
         } else {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
             currentUser = data.user;
             showUserInHeader(data.user.email);
