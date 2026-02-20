@@ -3,609 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClientMint - Generate Professional Websites in Minutes with AI</title>
-    <meta name="description" content="Create stunning, professional websites in under 5 minutes using AI. No coding required. Get your business online today.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>ClientMint — AI Website Builder | Generate Professional Websites in Minutes</title>
+    <meta name="description" content="Create stunning, professional websites in under 5 minutes using AI. No coding required. Custom domains, SEO, contact forms included.">
+    <meta property="og:title" content="ClientMint — AI Website Builder">
+    <meta property="og:description" content="Generate professional websites instantly with AI. No coding needed.">
+    <meta property="og:type" content="website">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --primary: #6366F1;
-            --primary-light: #818CF8;
-            --primary-dark: #4F46E5;
-            --accent: #14B8A6;
-            --success: #10B981;
-            --text: #F1F5F9;
-            --text-muted: #94A3B8;
-            --bg-dark: #0F172A;
-            --border: rgba(148, 163, 184, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #0F172A;
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .bg-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .gradient-bg {
-            position: absolute;
-            width: 100%; height: 100%;
-            background: linear-gradient(125deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        .orb-1 {
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
-            top: -10%; right: -5%;
-        }
-
-        .orb-2 {
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%);
-            bottom: -10%; left: 10%;
-            animation-delay: 3s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(40px, -60px) rotate(5deg); }
-            50% { transform: translate(-30px, 40px) rotate(-5deg); }
-            75% { transform: translate(30px, 20px) rotate(3deg); }
-        }
-
-        .website-previews {
-            position: absolute;
-            width: 100%; height: 100%;
-            opacity: 0.15;
-        }
-
-        .preview-card {
-            position: absolute;
-            width: 300px; height: 200px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            backdrop-filter: blur(10px);
-            animation: floatPreview 25s ease-in-out infinite;
-        }
-
-        .preview-card:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
-        .preview-card:nth-child(2) { top: 60%; left: 70%; animation-delay: 5s; }
-        .preview-card:nth-child(3) { top: 30%; right: 10%; animation-delay: 10s; }
-
-        @keyframes floatPreview {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-30px); }
-        }
-
-        .preview-mini {
-            width: 100%; height: 30%;
-            background: linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(20,184,166,0.2) 100%);
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-        }
-
-        .preview-text {
-            width: 80%; height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 4px;
-            margin: 0.5rem 0;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            width: 100%; height: 100%;
-            background-image: 
-                linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.5;
-        }
-
-        .main-container {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            padding: 1.5rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-light), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo::before {
-            content: '⚡';
-            font-size: 1.75rem;
-            filter: drop-shadow(0 0 10px var(--primary));
-            margin-right: 0.5rem;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-email {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .btn-signout {
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-signout:hover {
-            border-color: var(--primary);
-            color: var(--text);
-        }
-
-        .hero {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 5%;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 4.5rem;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, #FFFFFF 0%, var(--text-muted) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, var(--primary-light), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            font-size: 1.35rem;
-            color: var(--text-muted);
-            margin-bottom: 3rem;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin-bottom: 3rem;
-            animation: fadeInUp 0.8s ease 0.4s both;
-        }
-
-        .stat { text-align: center; }
-
-        .stat-number {
-            display: block;
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary-light), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2.5rem;
-            backdrop-filter: blur(20px);
-            animation: fadeInUp 0.8s ease 0.6s both;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        textarea { height: 120px; resize: vertical; }
-
-        .btn-primary {
-            width: 100%;
-            padding: 1.1rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
-        }
-
-        /* SCREENS */
-        .screen { display: none; width: 100%; min-height: 100vh; }
-        .screen.active { display: block; }
-
-        /* LOADING SCREEN */
-        .loading-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .loading-icon {
-            width: 80px; height: 80px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 2rem;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .progress-bar-container {
-            width: 100%;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 3px;
-            width: 0%;
-            transition: width 1s ease;
-        }
-
-        /* EDITOR SCREEN */
-        .editor-screen {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            height: 100vh;
-        }
-
-        .sidebar {
-            background: rgba(15, 23, 42, 0.95);
-            border-right: 1px solid var(--border);
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .progress-item {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .progress-item.complete {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--success);
-        }
-
-        .progress-title { font-weight: 600; margin-bottom: 0.5rem; }
-        .progress-description { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
-
-        .preview-area { background: #f5f5f5; position: relative; }
-        .preview-frame { width: 100%; height: 100%; border: none; }
-
-        .upgrade-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(30, 41, 59, 0.95);
-            border-top: 1px solid var(--border);
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(40px);
-            z-index: 100;
-        }
-
-        .btn-upgrade {
-            padding: 0.75rem 2rem;
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-upgrade:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
-        }
-
-        /* AUTH MODAL */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: #1E293B;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 420px;
-            margin: 1rem;
-            position: relative;
-        }
-
-        .modal h2 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #FFFFFF, var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .modal p {
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .modal input {
-            margin-bottom: 1rem;
-        }
-
-        .btn-google {
-            width: 100%;
-            padding: 1rem;
-            background: white;
-            color: #1E293B;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-google:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
-        }
-
-        .auth-divider {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .auth-divider hr {
-            flex: 1;
-            border: none;
-            border-top: 1px solid var(--border);
-        }
-
-        .auth-divider span {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-
-        .btn-auth {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-        }
-
-        .btn-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-        }
-
-        .auth-switch {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .auth-switch a {
-            color: var(--primary-light);
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .auth-switch a:hover { text-decoration: underline; }
-
-        .auth-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            color: #FCA5A5;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .auth-error.active { display: block; }
-
-        .auth-success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            color: #6EE7B7;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .auth-success.active { display: block; }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .form-card { padding: 2rem 1.5rem; }
-            .editor-screen { grid-template-columns: 1fr; }
-            .sidebar { display: none; }
-            .stats { gap: 1.5rem; }
-        }
-
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 5px; }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{--p:#6366F1;--pl:#818CF8;--pd:#4F46E5;--a:#14B8A6;--g:#10B981;--t:#F1F5F9;--tm:#94A3B8;--bg:#0A0F1E;--card:rgba(15,23,42,0.8);--b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25)}
+        html{scroll-behavior:smooth}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);line-height:1.6;overflow-x:hidden}
+        .bg-container{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+        .gradient-bg{position:absolute;inset:0;background:linear-gradient(125deg,#0A0F1E 0%,#1E293B 50%,#0A0F1E 100%)}
+        .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:float 20s ease-in-out infinite}
+        .orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,.4),transparent 70%);top:-10%;right:-5%}
+        .orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(20,184,166,.3),transparent 70%);bottom:-10%;left:10%;animation-delay:3s}
+        @keyframes float{0%,100%{transform:translate(0,0)}25%{transform:translate(40px,-60px)}50%{transform:translate(-30px,40px)}75%{transform:translate(30px,20px)}}
+        .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:50px 50px;opacity:.5}
+        .screen{display:none;min-height:100vh}.screen.active{display:block}
+        .main-container{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+        .header{padding:1.25rem 5%;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);border-bottom:1px solid var(--b);background:rgba(10,15,30,.5)}
+        .logo{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;display:flex;align-items:center;gap:.5rem}
+        .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:8px;display:grid;place-items:center;font-size:14px;-webkit-text-fill-color:white}
+        .header-right{display:flex;align-items:center;gap:.75rem}
+        .user-email{font-size:.82rem;color:var(--tm)}
+        .btn-h{padding:.4rem .9rem;background:transparent;border:1px solid var(--b);color:var(--tm);border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .2s;font-family:'DM Sans',sans-serif;text-decoration:none}
+        .btn-h:hover{border-color:var(--bg2);color:var(--t)}
+        .hero{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 5%}
+        .hero-content{max-width:800px;width:100%;text-align:center}
+        h1{font-family:'Syne',sans-serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.08;margin-bottom:1.25rem;letter-spacing:-2px}
+        .grad{background:linear-gradient(135deg,var(--pl) 0%,var(--a) 50%,#F472B6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .subtitle{font-size:1.05rem;color:var(--tm);max-width:560px;margin:0 auto 2rem;line-height:1.7}
+        .stats{display:flex;justify-content:center;gap:2.5rem;margin-bottom:2rem}
+        .stat{text-align:center}
+        .stat-number{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-label{font-size:.72rem;color:var(--tm);display:block;margin-top:.1rem}
+        .form-card{background:var(--card);border:1px solid var(--b);border-radius:20px;padding:2.25rem;max-width:560px;margin:0 auto;backdrop-filter:blur(20px)}
+        .form-group{margin-bottom:1rem}
+        .form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--tm);margin-bottom:.4rem}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:.75rem .9rem;background:rgba(15,23,42,.9);border:1px solid var(--b);border-radius:10px;color:var(--t);font-size:.9rem;font-family:'DM Sans',sans-serif;transition:border-color .2s}
+        .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--pl)}
+        .form-group textarea{min-height:80px;resize:vertical}
+        .form-group select{appearance:none;cursor:pointer}
+        .style-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+        .btn-primary{width:100%;padding:.9rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s}
+        .btn-primary:hover{box-shadow:0 12px 35px rgba(99,102,241,.45);transform:translateY(-2px)}
+        .features{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:560px;margin:1.75rem auto 0}
+        .feature{font-size:.7rem;color:var(--tm);padding:.45rem;background:rgba(15,23,42,.5);border:1px solid var(--b);border-radius:8px;text-align:center}
+        .feature strong{display:block;color:var(--t);font-size:.78rem;margin-bottom:1px}
+        .loading-screen{text-align:center}
+        .loading-icon{width:70px;height:70px;border:3px solid var(--b);border-top:3px solid var(--pl);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 2rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .progress-bar-container{width:100%;max-width:400px;height:6px;background:rgba(148,163,184,.1);border-radius:3px;margin:0 auto;overflow:hidden}
+        .progress-bar{height:100%;background:linear-gradient(90deg,var(--p),var(--a));border-radius:3px;width:0;transition:width .5s}
+        .editor-screen{display:grid;grid-template-columns:300px 1fr;height:100vh}
+        .sidebar{background:rgba(10,15,30,.95);border-right:1px solid var(--b);padding:1rem;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem}
+        .sb-section{background:var(--card);border:1px solid var(--b);border-radius:12px;padding:.85rem}
+        .sb-section h3{font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tm);margin-bottom:.6rem}
+        .edit-input{width:100%;padding:.6rem;background:rgba(15,23,42,.9);border:1px solid var(--b);border-radius:8px;color:var(--t);font-size:.82rem;font-family:'DM Sans',sans-serif;min-height:65px;resize:vertical}
+        .edit-input:focus{outline:none;border-color:var(--pl)}
+        .edit-btn{width:100%;padding:.55rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:.4rem}
+        .edit-btn:hover:not(:disabled){box-shadow:0 6px 20px rgba(99,102,241,.35)}
+        .edit-btn:disabled{opacity:.5;cursor:not-allowed}
+        .quick-edits{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
+        .qe{padding:.25rem .5rem;background:rgba(148,163,184,.04);border:1px solid var(--b);border-radius:5px;color:var(--tm);font-size:.68rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .qe:hover{border-color:var(--bg2);color:var(--t)}
+        .preview-modes{display:flex;gap:.3rem}
+        .pm{padding:.25rem .5rem;background:transparent;border:1px solid var(--b);border-radius:5px;color:var(--tm);font-size:.68rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .pm.active{background:rgba(99,102,241,.12);border-color:var(--bg2);color:var(--pl)}
+        .tool{width:100%;padding:.45rem .6rem;background:rgba(148,163,184,.03);border:1px solid var(--b);border-radius:7px;color:var(--tm);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;text-align:left;display:flex;align-items:center;gap:.4rem}
+        .tool:hover{border-color:var(--bg2);color:var(--t);background:rgba(99,102,241,.05)}
+        .tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+        .preview-area{position:relative;background:#111827;overflow:hidden;display:flex;justify-content:center}
+        .preview-frame{width:100%;height:100%;border:none;background:#fff;transition:max-width .3s}
+        .upgrade-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(10,15,30,.95);backdrop-filter:blur(20px);border-top:1px solid var(--b);padding:.85rem 5%;display:flex;align-items:center;justify-content:space-between;z-index:100}
+        .btn-upgrade{padding:.6rem 1.3rem;background:linear-gradient(135deg,var(--g),#059669);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s}
+        .btn-upgrade:hover{box-shadow:0 8px 25px rgba(16,185,129,.35);transform:translateY(-1px)}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+        .modal-overlay.active{display:flex}
+        .modal{background:var(--card);border:1px solid var(--b);border-radius:20px;padding:2.25rem;max-width:400px;width:90%;backdrop-filter:blur(20px)}
+        .modal h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:.3rem}
+        .modal p{color:var(--tm);font-size:.85rem;margin-bottom:1.25rem}
+        .modal input{width:100%;padding:.75rem .9rem;background:rgba(15,23,42,.9);border:1px solid var(--b);border-radius:10px;color:var(--t);font-size:.88rem;margin-bottom:.65rem;font-family:'DM Sans',sans-serif}
+        .modal input:focus{outline:none;border-color:var(--pl)}
+        .btn-auth{width:100%;padding:.8rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:.75rem}
+        .btn-google{width:100%;padding:.7rem;background:#fff;color:#333;border:1px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.75rem}
+        .btn-google:hover{background:#f5f5f5}
+        .auth-divider{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;color:var(--tm);font-size:.78rem}
+        .auth-divider hr{flex:1;border:none;border-top:1px solid var(--b)}
+        .auth-switch{text-align:center;font-size:.82rem;color:var(--tm)}
+        .auth-switch a{color:var(--pl);cursor:pointer;font-weight:600}
+        .auth-error,.auth-success{border-radius:8px;padding:.65rem .85rem;font-size:.82rem;margin-bottom:.75rem;display:none}
+        .auth-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#FCA5A5}
+        .auth-success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#6EE7B7}
+        .auth-error.active,.auth-success.active{display:block}
+        @media(max-width:768px){h1{font-size:2.2rem}.form-card{padding:1.5rem}.editor-screen{grid-template-columns:1fr}.sidebar{display:none}.stats{gap:1.5rem}.features{grid-template-columns:repeat(2,1fr)}}
     </style>
 </head>
 <body>
-    <div class="bg-container">
-        <div class="gradient-bg"></div>
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="website-previews">
-            <div class="preview-card">
-                <div class="preview-mini"></div>
-                <div class="preview-text"></div>
-                <div class="preview-text" style="width: 60%;"></div>
-            </div>
-            <div class="preview-card">
-                <div class="preview-mini"></div>
-                <div class="preview-text"></div>
-                <div class="preview-text" style="width: 70%;"></div>
-            </div>
-            <div class="preview-card">
-                <div class="preview-mini"></div>
-                <div class="preview-text"></div>
-                <div class="preview-text" style="width: 50%;"></div>
-            </div>
-        </div>
-        <div class="grid-overlay"></div>
-    </div>
+    <div class="bg-container"><div class="gradient-bg"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="grid-overlay"></div></div>
 
     <!-- AUTH MODAL -->
     <div id="authModal" class="modal-overlay">
@@ -614,29 +112,15 @@
             <p id="authSubtitle">Sign up to generate your free website</p>
             <div class="auth-error" id="authError"></div>
             <div class="auth-success" id="authSuccess"></div>
-
-            <!-- Google Sign-In Button -->
             <button class="btn-google" onclick="signInWithGoogle()">
-                <svg width="18" height="18" viewBox="0 0 18 18">
-                    <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
-                    <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
-                    <path fill="#FBBC05" d="M4.5 10.48A4.8 4.8 0 0 1 4.5 7.5V5.43H1.83a8 8 0 0 0 0 7.14z"/>
-                    <path fill="#EA4335" d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8 8 0 0 0 1.83 5.43L4.5 7.5c.67-2 2.52-3.92 4.48-3.92z"/>
-                </svg>
+                <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.48A4.8 4.8 0 0 1 4.5 7.5V5.43H1.83a8 8 0 0 0 0 7.14z"/><path fill="#EA4335" d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8 8 0 0 0 1.83 5.43L4.5 7.5c.67-2 2.52-3.92 4.48-3.92z"/></svg>
                 Continue with Google
             </button>
-
-            <!-- Divider -->
-            <div class="auth-divider">
-                <hr><span>or continue with email</span><hr>
-            </div>
-
-            <input type="email" id="authEmail" placeholder="Your email address">
-            <input type="password" id="authPassword" placeholder="Password (min 6 characters)">
+            <div class="auth-divider"><hr><span>or email</span><hr></div>
+            <input type="email" id="authEmail" placeholder="Email address">
+            <input type="password" id="authPassword" placeholder="Password (min 6 chars)">
             <button class="btn-auth" id="authBtn">Create Account & Generate</button>
-            <div class="auth-switch" id="authSwitch">
-                Already have an account? <a onclick="toggleAuthMode()">Sign in</a>
-            </div>
+            <div class="auth-switch" id="authSwitch">Already have an account? <a onclick="toggleAuthMode()">Sign in</a></div>
         </div>
     </div>
 
@@ -644,42 +128,66 @@
     <div id="homeScreen" class="screen active">
         <div class="main-container">
             <div class="header">
-                <div class="logo">ClientMint</div>
+                <a href="/" class="logo"><div class="logo-mark">⚡</div>ClientMint</a>
                 <div class="header-right">
+                    <a href="/pricing" class="btn-h">Pricing</a>
+                    <a href="/dashboard" class="btn-h" id="dashboardBtn" style="display:none">Dashboard</a>
                     <span class="user-email" id="userEmailDisplay"></span>
-                    <button class="btn-signout" id="signOutBtn" style="display:none" onclick="signOut()">Sign Out</button>
+                    <button class="btn-h" id="signOutBtn" style="display:none" onclick="signOut()">Sign Out</button>
                 </div>
             </div>
             <div class="hero">
                 <div class="hero-content">
-                    <h1>Build <span class="gradient-text">Perfect Websites</span><br>With AI in Minutes</h1>
-                    <p class="subtitle">No coding. No templates. Just describe your business and watch AI create a stunning, 100% unique professional website instantly.</p>
+                    <h1>Build <span class="grad">Professional Websites</span> With AI</h1>
+                    <p class="subtitle">Describe your business, get a stunning website in minutes. AI-generated design, SEO, contact forms &mdash; no coding required.</p>
                     <div class="stats">
-                        <div class="stat">
-                            <span class="stat-number">52,847</span>
-                            <span class="stat-label">Sites Created</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">3min</span>
-                            <span class="stat-label">Avg Build Time</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">4.9★</span>
-                            <span class="stat-label">Rating</span>
-                        </div>
+                        <div class="stat"><span class="stat-number">52,847</span><span class="stat-label">Sites Created</span></div>
+                        <div class="stat"><span class="stat-number">3 min</span><span class="stat-label">Avg Build</span></div>
+                        <div class="stat"><span class="stat-number">4.9★</span><span class="stat-label">Rating</span></div>
                     </div>
                     <div class="form-card">
                         <form id="mainForm">
                             <div class="form-group">
-                                <label for="businessName">Business Name</label>
+                                <label>Business Name</label>
                                 <input type="text" id="businessName" placeholder="e.g., Tony's Pizza" required>
                             </div>
                             <div class="form-group">
-                                <label for="businessDescription">Describe Your Business</label>
-                                <textarea id="businessDescription" placeholder="Family-owned Italian restaurant in Brooklyn serving authentic Neapolitan pizza with fresh ingredients..." required></textarea>
+                                <label>Describe Your Business</label>
+                                <textarea id="businessDescription" placeholder="Family-owned Italian restaurant in Brooklyn serving authentic Neapolitan pizza..." required></textarea>
                             </div>
-                            <button type="submit" class="btn-primary" id="generateBtn">✨ Create My Website</button>
+                            <div class="style-row">
+                                <div class="form-group">
+                                    <label>Color Vibe (optional)</label>
+                                    <select id="colorPref">
+                                        <option value="">Auto (AI picks)</option>
+                                        <option value="blue and white, professional">Professional Blue</option>
+                                        <option value="dark mode, purple accents">Dark & Modern</option>
+                                        <option value="warm earth tones, orange and brown">Warm & Earthy</option>
+                                        <option value="green and white, clean and fresh">Fresh Green</option>
+                                        <option value="bold red and black">Bold Red</option>
+                                        <option value="pastel colors, soft and friendly">Soft Pastels</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Font Style (optional)</label>
+                                    <select id="fontPref">
+                                        <option value="">Auto (AI picks)</option>
+                                        <option value="Inter">Inter (Clean)</option>
+                                        <option value="Playfair Display">Playfair (Elegant)</option>
+                                        <option value="Space Grotesk">Space Grotesk (Tech)</option>
+                                        <option value="Lora">Lora (Classic)</option>
+                                        <option value="Poppins">Poppins (Friendly)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary">✨ Create My Website — Free</button>
                         </form>
+                    </div>
+                    <div class="features">
+                        <div class="feature"><strong>🎨 AI Design</strong>Unique layouts</div>
+                        <div class="feature"><strong>📱 Responsive</strong>All devices</div>
+                        <div class="feature"><strong>🔍 SEO Ready</strong>Google-friendly</div>
+                        <div class="feature"><strong>📬 Contact Forms</strong>Built-in</div>
                     </div>
                 </div>
             </div>
@@ -689,16 +197,13 @@
     <!-- LOADING SCREEN -->
     <div id="loadingScreen" class="screen">
         <div class="main-container">
-            <div class="header"><div class="logo">ClientMint</div></div>
+            <div class="header"><a href="/" class="logo"><div class="logo-mark">⚡</div>ClientMint</a></div>
             <div class="hero">
                 <div class="loading-screen">
                     <div class="loading-icon"></div>
-                    <h2 style="font-size: 2rem; margin-bottom: 1rem;">Building your website</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Our AI is creating your unique design...</p>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    <p style="color: var(--text-muted); margin-top: 1.5rem; font-size: 0.95rem;">Generating custom copy, selecting images, and building your site structure</p>
+                    <h2 style="font-family:Syne,sans-serif;font-size:1.75rem;margin-bottom:.75rem">Building your website</h2>
+                    <p style="color:var(--tm);margin-bottom:1.5rem">AI is designing your unique site with SEO, forms &amp; responsive layout...</p>
+                    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
                 </div>
             </div>
         </div>
@@ -708,34 +213,67 @@
     <div id="editorScreen" class="screen">
         <div class="editor-screen">
             <div class="sidebar">
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">Your professional website</p>
-                <div class="progress-item complete">
-                    <div class="progress-title">✓ Website Generated</div>
-                    <div class="progress-description" id="thinkingText">Created custom design for your business</div>
+                <!-- Edit Usage -->
+                <div class="sb-section" id="editUsageBar">
+                    <h3>Usage</h3>
+                    <p style="font-size:.78rem;color:var(--tm)">Loading...</p>
                 </div>
-                <div class="progress-item complete">
-                    <div class="progress-title">✓ Content Written</div>
-                    <div class="progress-description">SEO-optimized copy tailored to your industry</div>
+
+                <!-- AI Edit -->
+                <div class="sb-section">
+                    <h3>AI Editor</h3>
+                    <textarea class="edit-input" id="editInput" placeholder='Try: "Make the hero section blue" or "Add a pricing section"'></textarea>
+                    <button class="edit-btn" id="editBtn" onclick="applyAIEdit()">Apply Edit</button>
+                    <div class="quick-edits">
+                        <button class="qe" onclick="quickEdit('Change the color scheme to blue and white')">🔵 Blue</button>
+                        <button class="qe" onclick="quickEdit('Make it dark mode with purple accents')">🌙 Dark</button>
+                        <button class="qe" onclick="quickEdit('Add a pricing section with 3 tiers')">💰 Pricing</button>
+                        <button class="qe" onclick="quickEdit('Add a FAQ section with 5 questions')">❓ FAQ</button>
+                        <button class="qe" onclick="quickEdit('Add a team section with 4 members')">👥 Team</button>
+                        <button class="qe" onclick="quickEdit('Make the fonts larger and more modern')">🔤 Bigger Text</button>
+                    </div>
                 </div>
-                <div class="progress-item complete">
-                    <div class="progress-title">✓ Images Selected</div>
-                    <div class="progress-description">High-quality images matched to your business</div>
+
+                <!-- Preview Modes -->
+                <div class="sb-section">
+                    <h3>Preview</h3>
+                    <div class="preview-modes">
+                        <button class="pm active" id="preview-desktop" onclick="setPreviewMode('desktop')">🖥 Desktop</button>
+                        <button class="pm" id="preview-tablet" onclick="setPreviewMode('tablet')">📱 Tablet</button>
+                        <button class="pm" id="preview-mobile" onclick="setPreviewMode('mobile')">📲 Mobile</button>
+                    </div>
                 </div>
-                <div class="progress-item complete">
-                    <div class="progress-title">✓ Ready to Publish</div>
-                    <div class="progress-description">Your website is ready to go live</div>
+
+                <!-- Tools -->
+                <div class="sb-section">
+                    <h3>Tools</h3>
+                    <div class="tool-grid">
+                        <button class="tool" id="logoBtn" onclick="generateLogo()">🎨 Logo</button>
+                        <button class="tool" onclick="showVersionHistory()">🕐 History</button>
+                        <button class="tool" onclick="exportSite()">📥 Export</button>
+                        <button class="tool" onclick="if(userData.siteId)sessionStorage.setItem('pendingSiteId',userData.siteId);window.location.href='/pricing'">⬆ Upgrade</button>
+                    </div>
                 </div>
-                <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted);">
-                    <strong>Free Preview Active</strong><br>Upgrade to publish and edit
-                </p>
+
+                <!-- Status -->
+                <div class="sb-section">
+                    <h3>Status</h3>
+                    <div style="font-size:.78rem;color:var(--tm);display:flex;flex-direction:column;gap:.35rem">
+                        <div>✅ Website generated</div>
+                        <div>✅ SEO meta tags</div>
+                        <div>✅ Contact form</div>
+                        <div>✅ Mobile responsive</div>
+                        <div>✅ Schema.org markup</div>
+                    </div>
+                </div>
             </div>
             <div class="preview-area">
                 <iframe id="previewFrame" class="preview-frame"></iframe>
             </div>
         </div>
         <div class="upgrade-bar">
-            <div style="color: var(--text-muted); font-size: 0.9rem;">🎉 Your website is ready! Publish it online in one click.</div>
-            <button class="btn-upgrade" id="upgradeBtn">Publish My Website - $9/mo</button>
+            <div style="color:var(--tm);font-size:.85rem">🎉 Your site is ready! Publish to get a live URL, custom domain &amp; more.</div>
+            <button class="btn-upgrade" id="upgradeBtn">Publish — $9/mo</button>
         </div>
     </div>
 
