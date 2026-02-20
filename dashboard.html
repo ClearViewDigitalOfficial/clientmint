@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — ClientMint</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -14,26 +14,30 @@
     .mesh{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.15) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(20,184,166,.1) 0%,transparent 55%)}
     .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:60px 60px}
     nav{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.5)}
-    .logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;display:flex;align-items:center;gap:.5rem}
-    .logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:7px;display:grid;place-items:center;font-size:13px;-webkit-text-fill-color:white}
+    .logo{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.5rem;letter-spacing:-.5px}
+    .logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:7px;display:grid;place-items:center;font-size:13px;color:white;flex-shrink:0}
+    .logo span{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav-links{display:flex;gap:1.5rem}.nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--t)}
     .nav-r{display:flex;align-items:center;gap:.75rem}
     .nbtn{padding:.4rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}.nbtn:hover{border-color:var(--bg2);color:var(--t)}
     #navEmail{font-size:.8rem;color:var(--tm)}
     .main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:2.5rem 5%}
-    .welcome{margin-bottom:2rem}.welcome h1{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:.3rem}.welcome p{color:var(--tm);font-size:.9rem}
-    .tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--b);padding-bottom:0}
-    .tab{padding:.6rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tm);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .welcome{margin-bottom:2rem}.welcome h1{font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;margin-bottom:.3rem;letter-spacing:-1px}.welcome p{color:var(--tm);font-size:.9rem}
+    .tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--b)}
+    .tab{padding:.6rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tm);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-bottom:-1px}
     .tab.active{color:var(--pl);border-bottom-color:var(--pl)}
     .tab:hover:not(.active){color:var(--t)}
     .tab-content{display:none}.tab-content.active{display:block}
     .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
     .stat-card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:1.25rem;backdrop-filter:blur(20px)}
     .stat-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--tm);margin-bottom:.4rem}
-    .stat-val{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:var(--t)}
+    .stat-val{font-family:'Inter',sans-serif;font-size:1.75rem;font-weight:800;color:var(--t)}
     .stat-val.green{color:var(--g)}.stat-val.purple{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .upgrade-banner{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(20,184,166,.1));border:1px solid rgba(99,102,241,.25);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .upgrade-banner p{font-size:.9rem;color:var(--t)}.upgrade-banner p span{color:var(--pl);font-weight:600}
+    .upgrade-banner-btn{padding:.5rem 1.2rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
     .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-    .section-head h2{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
+    .section-head h2{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-.5px}
     .new-btn{padding:.5rem 1.1rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s}
     .new-btn:hover{box-shadow:0 8px 25px rgba(99,102,241,.4)}
     .sites-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
@@ -45,7 +49,7 @@
     .preview-overlay span{background:rgba(99,102,241,.9);color:#fff;padding:.4rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600}
     .site-preview:hover .preview-overlay{opacity:1}
     .site-info{padding:1rem}
-    .site-name{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .site-name{font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .site-meta{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap}
     .pill{display:inline-flex;align-items:center;gap:.2rem;padding:.18rem .55rem;border-radius:100px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
     .pill.live{background:rgba(16,185,129,.12);color:var(--g);border:1px solid rgba(16,185,129,.25)}
@@ -60,7 +64,6 @@
     .abtn.view{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none}
     .abtn.del{border-color:rgba(239,68,68,.2);color:var(--r)}
     .abtn.del:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4)}
-    /* Form submissions */
     .sub-table{width:100%;border-collapse:collapse}
     .sub-table th,.sub-table td{padding:.65rem .75rem;text-align:left;border-bottom:1px solid var(--b);font-size:.82rem}
     .sub-table th{color:var(--tm);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
@@ -68,14 +71,14 @@
     .sub-table tr:hover{background:rgba(99,102,241,.03)}
     .empty{text-align:center;padding:4rem 2rem;background:var(--card);border:1px solid var(--b);border-radius:16px}
     .empty-icon{font-size:3rem;margin-bottom:.75rem}
-    .empty h3{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.4rem}
+    .empty h3{font-family:'Inter',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.4rem}
     .empty p{color:var(--tm);margin-bottom:1.5rem;font-size:.9rem}
     .empty-btn{padding:.75rem 1.75rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer}
     .spinner-wrap{text-align:center;padding:4rem}
     .spinner{width:40px;height:40px;border:3px solid var(--b);border-top-color:var(--p);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
     @keyframes spin{to{transform:rotate(360deg)}}
     .auth-gate{text-align:center;padding:6rem 2rem}
-    .auth-gate h2{font-family:'Syne',sans-serif;font-size:2rem;margin-bottom:.75rem}
+    .auth-gate h2{font-family:'Inter',sans-serif;font-size:2rem;margin-bottom:.75rem;letter-spacing:-1px}
     .auth-gate p{color:var(--tm);margin-bottom:2rem}
     .auth-gate a{padding:.9rem 2.5rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border-radius:12px;font-weight:700;text-decoration:none;display:inline-block}
     @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.tabs{overflow-x:auto}}
@@ -84,12 +87,12 @@
 <body>
 <div class="bg"><div class="mesh"></div><div class="grid"></div></div>
 <nav>
-  <a href="/" class="logo"><div class="logo-mark">⚡</div>ClientMint</a>
+  <a href="/" class="logo"><div class="logo-mark">⚡</div>Client<span>Mint</span></a>
   <div class="nav-links"><a href="/">Home</a><a href="/pricing">Pricing</a><a href="/dashboard" class="active">Dashboard</a></div>
   <div class="nav-r"><span id="navEmail"></span><button class="nbtn" onclick="signOut()">Sign Out</button></div>
 </nav>
 <div class="main" id="mainContent">
-  <div class="spinner-wrap"><div class="spinner"></div><p style="color:var(--tm)">Loading...</p></div>
+  <div class="spinner-wrap"><div class="spinner"></div><p style="color:var(--tm)">Loading your dashboard...</p></div>
 </div>
 
 <script>
@@ -100,68 +103,101 @@
   let allSites = [];
   let activeTab = 'sites';
 
+  // Fix: use onAuthStateChange to reliably catch Google OAuth redirects
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (session && session.user) {
+      currentUser = session.user;
+      document.getElementById('navEmail').textContent = session.user.email;
+      await loadDashboard();
+    } else if (!currentUser) {
+      // No session after waiting — show auth gate
+      showAuthGate();
+    }
+  });
+
+  // Also try getSession on load as fallback
   window.addEventListener('load', async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { showAuthGate(); return; }
-    currentUser = session.user;
-    document.getElementById('navEmail').textContent = session.user.email;
-    loadDashboard();
+    if (session && session.user && !currentUser) {
+      currentUser = session.user;
+      document.getElementById('navEmail').textContent = session.user.email;
+      await loadDashboard();
+    } else if (!session) {
+      // Give onAuthStateChange 2 seconds to fire before showing gate
+      setTimeout(() => {
+        if (!currentUser) showAuthGate();
+      }, 2000);
+    }
   });
 
   async function signOut() { await supabase.auth.signOut(); window.location.href = '/'; }
+
   function showAuthGate() {
-    document.getElementById('mainContent').innerHTML = '<div class="auth-gate"><h2>Sign in to view your dashboard</h2><p>Manage sites, view submissions, and configure domains.</p><a href="/">Go to ClientMint →</a></div>';
+    document.getElementById('mainContent').innerHTML = '<div class="auth-gate"><h2>Sign in to continue</h2><p>Manage your websites, view form submissions, and configure domains.</p><a href="/">Go to ClientMint →</a></div>';
   }
 
   async function loadDashboard() {
     try {
-      const res = await fetch('/api/my-sites?userId=' + currentUser.id);
-      allSites = await res.json() || [];
-
-      const usageRes = await fetch('/api/edit-usage?userId=' + currentUser.id);
+      const [sitesRes, usageRes] = await Promise.all([
+        fetch('/api/my-sites?userId=' + currentUser.id),
+        fetch('/api/edit-usage?userId=' + currentUser.id)
+      ]);
+      allSites = await sitesRes.json() || [];
       const usage = await usageRes.json();
-
       renderDashboard(allSites, usage);
-    } catch(e) { renderDashboard([], { plan: 'free', editCount: 0, editLimit: 5 }); }
+    } catch(e) {
+      renderDashboard([], { plan: 'free', editCount: 0, editLimit: 3, remaining: 3 });
+    }
   }
 
   function renderDashboard(sites, usage) {
     const published = sites.filter(s => s.published).length;
     const plan = usage.plan || 'free';
+    const isFree = plan === 'free';
     const mc = document.getElementById('mainContent');
+
+    const upgradeBanner = isFree ? `
+      <div class="upgrade-banner">
+        <p>🚀 Free plan: <span>${usage.remaining || 0} AI edits</span> remaining this month · 1 website max · No publishing</p>
+        <button class="upgrade-banner-btn" onclick="window.location.href='/pricing'">Upgrade to Pro →</button>
+      </div>` : '';
+
     mc.innerHTML = `
-      <div class="welcome"><h1>Welcome back 👋</h1><p>${currentUser.email} · ${cap(plan)} Plan · ${usage.remaining || 0} edits remaining this month</p></div>
+      <div class="welcome"><h1>Dashboard 👋</h1><p>${currentUser.email} · ${cap(plan)} Plan</p></div>
+      ${upgradeBanner}
       <div class="stats">
-        <div class="stat-card"><div class="stat-label">Sites</div><div class="stat-val purple">${sites.length}</div></div>
+        <div class="stat-card"><div class="stat-label">Websites</div><div class="stat-val purple">${sites.length}</div></div>
         <div class="stat-card"><div class="stat-label">Published</div><div class="stat-val green">${published}</div></div>
-        <div class="stat-card"><div class="stat-label">Edits Used</div><div class="stat-val">${usage.editCount || 0} / ${usage.editLimit || 5}</div></div>
+        <div class="stat-card"><div class="stat-label">AI Edits Used</div><div class="stat-val">${usage.editCount || 0} / ${usage.editLimit || 3}</div></div>
         <div class="stat-card"><div class="stat-label">Plan</div><div class="stat-val" style="font-size:1.3rem;margin-top:.15rem">${cap(plan)}</div></div>
       </div>
       <div class="tabs">
-        <button class="tab active" onclick="switchTab('sites')">🌐 My Sites</button>
-        <button class="tab" onclick="switchTab('submissions')">📬 Form Submissions</button>
-        <button class="tab" onclick="switchTab('domains')">🔗 Domains</button>
+        <button class="tab active" onclick="switchTab('sites', this)">🌐 My Sites</button>
+        <button class="tab" onclick="switchTab('submissions', this)">📬 Form Submissions</button>
+        <button class="tab" onclick="switchTab('domains', this)">🔗 Domains</button>
       </div>
       <div class="tab-content active" id="tab-sites">
         <div class="section-head"><h2>Your Websites</h2><button class="new-btn" onclick="window.location.href='/'">+ New Site</button></div>
         ${sites.length === 0 ? renderEmpty() : '<div class="sites-grid">' + sites.map(renderSiteCard).join('') + '</div>'}
       </div>
-      <div class="tab-content" id="tab-submissions"><div class="spinner-wrap" id="submissionsContent"><div class="spinner"></div><p style="color:var(--tm)">Loading submissions...</p></div></div>
+      <div class="tab-content" id="tab-submissions">
+        <div id="submissionsContent"><div class="spinner-wrap"><div class="spinner"></div><p style="color:var(--tm)">Loading...</p></div></div>
+      </div>
       <div class="tab-content" id="tab-domains">
         <div class="section-head"><h2>Custom Domains</h2></div>
         ${sites.filter(s=>s.custom_domain).length === 0
-          ? '<div class="empty"><div class="empty-icon">🔗</div><h3>No custom domains yet</h3><p>Connect a custom domain to any published site from the site card below.</p></div>'
+          ? '<div class="empty"><div class="empty-icon">🔗</div><h3>No custom domains yet</h3><p>Connect a custom domain to any published Pro or Business site.</p></div>'
           : sites.filter(s=>s.custom_domain).map(s => `<div class="stat-card" style="margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${esc(s.custom_domain)}</strong><div style="font-size:.75rem;color:var(--tm)">${esc(s.business_name)} · Status: ${s.domain_status||'pending'}</div></div><span class="pill ${s.domain_status==='active'?'live':'draft'}">${s.domain_status||'pending'}</span></div></div>`).join('')
         }
       </div>
     `;
   }
 
-  function switchTab(tab) {
+  function switchTab(tab, el) {
     activeTab = tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    el.classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
     if (tab === 'submissions') loadSubmissions();
   }
@@ -187,22 +223,21 @@
         </tr>`).join('')}</tbody>
       </table></div>`;
     } catch(e) {
-      document.getElementById('submissionsContent').innerHTML = '<p style="color:var(--r)">Failed to load submissions</p>';
+      document.getElementById('submissionsContent').innerHTML = '<p style="color:var(--r);padding:2rem">Failed to load submissions</p>';
     }
   }
 
   function renderEmpty() {
-    return '<div class="empty"><div class="empty-icon">🚀</div><h3>No websites yet</h3><p>Generate your first AI-powered website in under 3 minutes.</p><button class="empty-btn" onclick="window.location.href=\'/\'">✨ Create My First Website</button></div>';
+    return '<div class="empty"><div class="empty-icon">🚀</div><h3>No websites yet</h3><p>Generate your first AI-powered website in under 3 minutes — free to start.</p><button class="empty-btn" onclick="window.location.href=\'\'">✨ Create My First Website</button></div>';
   }
 
   function renderSiteCard(site) {
     const date = new Date(site.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const status = site.published ? '<span class="pill live">● Live</span>' : '<span class="pill draft">○ Draft</span>';
-    const planPill = site.plan && site.plan !== 'free' ? '<span class="pill '+site.plan+'">'+cap(site.plan)+'</span>' : '';
-    const domainBadge = site.custom_domain ? '<span class="pill live" style="font-size:.65rem">🔗 '+site.custom_domain+'</span>' : '';
+    const planPill = site.plan && site.plan !== 'free' ? `<span class="pill ${site.plan}">${cap(site.plan)}</span>` : '';
     const pubBtn = !site.published
-      ? '<button class="abtn pub" onclick="pubSite(\''+site.id+'\')">🚀 Publish</button>'
-      : '<button class="abtn view" onclick="window.open(\'/site/'+site.slug+'\',\'_blank\')">↗ Live</button>';
+      ? `<button class="abtn pub" onclick="pubSite('${site.id}')">🚀 Publish</button>`
+      : `<button class="abtn view" onclick="window.open('/site/${site.slug}','_blank')">↗ Live</button>`;
     return `<div class="site-card">
       <div class="site-preview" onclick="openEditor('${site.id}')">
         <iframe srcdoc="${escAttr(site.html)}" sandbox="allow-same-origin"></iframe>
@@ -210,13 +245,13 @@
       </div>
       <div class="site-info">
         <div class="site-name">${esc(site.business_name)}</div>
-        <div class="site-meta">${status}${planPill}${domainBadge}<span class="site-date">${date}</span></div>
+        <div class="site-meta">${status}${planPill}<span class="site-date">${date}</span></div>
         <div class="site-actions">
           <button class="abtn" onclick="openEditor('${site.id}')">✏️ Edit</button>
           ${pubBtn}
-          <button class="abtn" onclick="shareSite('${site.id}')">🔗</button>
-          <button class="abtn" onclick="connectDomain('${site.id}')">🌐</button>
-          <button class="abtn del" onclick="deleteSite('${site.id}','${esc(site.business_name)}')">🗑</button>
+          <button class="abtn" onclick="shareSite('${site.id}')" title="Copy link">🔗</button>
+          <button class="abtn" onclick="connectDomain('${site.id}')" title="Connect domain">🌐</button>
+          <button class="abtn del" onclick="deleteSite('${site.id}','${esc(site.business_name)}')" title="Delete">🗑</button>
         </div>
       </div>
     </div>`;
@@ -229,7 +264,7 @@
     if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
     try {
       await fetch('/api/delete-site', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ siteId: id, userId: currentUser.id }) });
-      toast('Site deleted'); loadDashboard();
+      toast('Site deleted ✅'); loadDashboard();
     } catch(e) { toast('Delete failed', 'error'); }
   }
 
@@ -237,7 +272,7 @@
     const site = allSites.find(s => s.id === id);
     if (site && site.slug) {
       navigator.clipboard.writeText(window.location.origin + '/site/' + site.slug);
-      toast('Link copied!');
+      toast('Link copied! ✅');
     }
   }
 
@@ -250,9 +285,9 @@
         body: JSON.stringify({ siteId: id, userId: currentUser.id, customDomain: domain })
       });
       const data = await res.json();
-      if (res.status === 403) { alert(data.error); return; }
+      if (res.status === 403) { alert(data.error + '\n\nUpgrade to Pro or Business to connect a custom domain.'); window.location.href='/pricing'; return; }
       if (data.success) {
-        alert('Domain configured!\\n\\nAdd this DNS record at your registrar:\\n\\nType: ' + data.dns.type + '\\nName: ' + data.dns.name + '\\nValue: ' + data.dns.value + '\\n\\n' + data.dns.note);
+        alert('Domain configured!\n\nAdd this DNS record at your registrar:\n\nType: ' + data.dns.type + '\nName: ' + data.dns.name + '\nValue: ' + data.dns.value + '\n\n' + data.dns.note);
         loadDashboard();
       } else { alert(data.error || 'Failed'); }
     } catch(e) { alert('Error: ' + e.message); }
@@ -260,8 +295,8 @@
 
   function toast(msg, type) {
     const t = document.createElement('div');
-    t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid '+(type==='error'?'#EF4444':'#10B981')+';border-radius:12px;padding:.85rem 1.25rem;color:#F1F5F9;font-size:.85rem;font-weight:500;z-index:9999';
-    t.textContent = (type==='error'?'❌ ':'✅ ') + msg;
+    t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid '+(type==='error'?'#EF4444':'#10B981')+';border-radius:12px;padding:.85rem 1.25rem;color:#F1F5F9;font-size:.85rem;font-weight:500;z-index:9999;animation:slideUp .3s ease';
+    t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);
   }
