@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — ClientMint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{--p:#6366F1;--pl:#818CF8;--pd:#4F46E5;--a:#14B8A6;--g:#10B981;--r:#EF4444;--w:#F59E0B;--t:#F1F5F9;--tm:#94A3B8;--bg:#0A0F1E;--card:rgba(15,23,42,0.8);--b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25)}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
+    .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .mesh{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(99,102,241,.15) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(20,184,166,.1) 0%,transparent 55%)}
+    .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:60px 60px}
+    nav{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.5)}
+    .logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;display:flex;align-items:center;gap:.5rem}
+    .logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:7px;display:grid;place-items:center;font-size:13px;-webkit-text-fill-color:white;flex-shrink:0}
+    .nav-links{display:flex;gap:1.5rem}
+    .nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--t)}
+    .nav-r{display:flex;align-items:center;gap:.75rem}
+    .nbtn{padding:.4rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}
+    .nbtn:hover{border-color:var(--bg2);color:var(--t)}
+    #navEmail{font-size:.8rem;color:var(--tm)}
+    .main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:2.5rem 5%}
+    .welcome{margin-bottom:2.5rem}
+    .welcome h1{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:.35rem}
+    .welcome p{color:var(--tm);font-size:.95rem}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2.5rem}
+    .stat-card{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:1.5rem;backdrop-filter:blur(20px)}
+    .stat-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--tm);margin-bottom:.5rem}
+    .stat-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--t)}
+    .stat-val.green{color:var(--g)}
+    .stat-val.purple{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+    .section-head h2{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800}
+    .new-btn{padding:.55rem 1.25rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:700;cursor:pointer;transition:all .25s}
+    .new-btn:hover{box-shadow:0 8px 25px rgba(99,102,241,.4);transform:translateY(-1px)}
+    .sites-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem}
+    .site-card{background:var(--card);border:1px solid var(--b);border-radius:18px;overflow:hidden;backdrop-filter:blur(20px);transition:transform .3s,border-color .3s,box-shadow .3s}
+    .site-card:hover{transform:translateY(-4px);border-color:var(--bg2);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+    .site-preview{height:180px;background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(20,184,166,.08));position:relative;overflow:hidden;cursor:pointer}
+    .site-preview iframe{width:200%;height:200%;transform:scale(.5);transform-origin:top left;pointer-events:none;border:none}
+    .preview-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,15,30,.5);opacity:0;transition:opacity .3s}
+    .preview-overlay span{background:rgba(99,102,241,.9);color:#fff;padding:.5rem 1.25rem;border-radius:8px;font-size:.85rem;font-weight:600}
+    .site-preview:hover .preview-overlay{opacity:1}
+    .site-info{padding:1.25rem}
+    .site-name{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .site-meta{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:100px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+    .pill.live{background:rgba(16,185,129,.12);color:var(--g);border:1px solid rgba(16,185,129,.25)}
+    .pill.draft{background:rgba(148,163,184,.08);color:var(--tm);border:1px solid var(--b)}
+    .pill.pro{background:rgba(99,102,241,.12);color:var(--pl);border:1px solid rgba(99,102,241,.25)}
+    .pill.business{background:rgba(20,184,166,.12);color:var(--a);border:1px solid rgba(20,184,166,.25)}
+    .site-date{font-size:.78rem;color:var(--tm)}
+    .site-actions{display:flex;gap:.6rem}
+    .action-btn{flex:1;padding:.6rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm)}
+    .action-btn:hover{border-color:var(--bg2);color:var(--t)}
+    .action-btn.publish{background:linear-gradient(135deg,var(--g),#059669);color:#fff;border:none}
+    .action-btn.publish:hover{box-shadow:0 6px 20px rgba(16,185,129,.35);transform:translateY(-1px)}
+    .action-btn.view{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none}
+    .action-btn.view:hover{box-shadow:0 6px 20px rgba(99,102,241,.35);transform:translateY(-1px)}
+    .empty{text-align:center;padding:5rem 2rem;background:var(--card);border:1px solid var(--b);border-radius:18px;backdrop-filter:blur(20px)}
+    .empty-icon{font-size:3.5rem;margin-bottom:1rem}
+    .empty h3{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:.5rem}
+    .empty p{color:var(--tm);margin-bottom:1.75rem;font-size:.95rem}
+    .empty-btn{padding:.85rem 2rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .25s}
+    .empty-btn:hover{box-shadow:0 12px 35px rgba(99,102,241,.45);transform:translateY(-2px)}
+    .spinner-wrap{text-align:center;padding:4rem}
+    .spinner{width:40px;height:40px;border:3px solid var(--b);border-top-color:var(--p);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .auth-gate{text-align:center;padding:6rem 2rem}
+    .auth-gate h2{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:.75rem}
+    .auth-gate p{color:var(--tm);margin-bottom:2rem}
+    .auth-gate a{padding:.9rem 2.5rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;text-decoration:none;display:inline-block;transition:all .25s}
+    .auth-gate a:hover{box-shadow:0 12px 35px rgba(99,102,241,.45);transform:translateY(-2px)}
+    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}}
+  </style>
+</head>
+<body>
+<div class="bg"><div class="mesh"></div><div class="grid"></div></div>
+<nav>
+  <a href="/" class="logo"><div class="logo-mark">⚡</div>ClientMint</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/dashboard" class="active">Dashboard</a>
+  </div>
+  <div class="nav-r">
+    <span id="navEmail"></span>
+    <button class="nbtn" onclick="signOut()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="main" id="mainContent">
+  <div class="spinner-wrap"><div class="spinner"></div><p style="color:var(--tm)">Loading...</p></div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://lgphbhtizcbmnsaecoje.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncGhiaHRpemNibW5zYWVjb2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTUyOTQsImV4cCI6MjA4NzA5MTI5NH0.8PemFAh7VHxHY4yWVXWqnrYtlHqxPq1kUj2cs0VgAKE';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let currentUser = null;
+
+  window.addEventListener('load', async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { showAuthGate(); return; }
+    currentUser = session.user;
+    document.getElementById('navEmail').textContent = session.user.email;
+    loadDashboard();
+  });
+
+  async function signOut() { await supabase.auth.signOut(); window.location.href = '/'; }
+
+  function showAuthGate() {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="auth-gate">
+        <h2>Sign in to view your dashboard</h2>
+        <p>Create and manage all your AI-generated websites in one place.</p>
+        <a href="/">Go to ClientMint →</a>
+      </div>`;
+  }
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch('/api/my-sites?userId=' + currentUser.id);
+      const sites = await res.json();
+      renderDashboard(sites || []);
+    } catch(e) { renderDashboard([]); }
+  }
+
+  function renderDashboard(sites) {
+    const published = sites.filter(s => s.published).length;
+    const plan = sites[0]?.plan || 'free';
+    document.getElementById('mainContent').innerHTML = `
+      <div class="welcome">
+        <h1>Welcome back 👋</h1>
+        <p>${currentUser.email} · ${capitalize(plan)} Plan</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card"><div class="stat-label">Total Sites</div><div class="stat-val purple">${sites.length}</div></div>
+        <div class="stat-card"><div class="stat-label">Published</div><div class="stat-val green">${published}</div></div>
+        <div class="stat-card"><div class="stat-label">Current Plan</div><div class="stat-val" style="font-size:1.4rem;margin-top:.2rem">${capitalize(plan)}</div></div>
+        <div class="stat-card"><div class="stat-label">Drafts</div><div class="stat-val">${sites.length - published}</div></div>
+      </div>
+      <div class="section-head">
+        <h2>Your Websites</h2>
+        <button class="new-btn" onclick="window.location.href='/'">+ Create New Site</button>
+      </div>
+      ${sites.length === 0 ? renderEmpty() : '<div class="sites-grid">' + sites.map(s => renderSiteCard(s)).join('') + '</div>'}
+    `;
+  }
+
+  function renderEmpty() {
+    return `<div class="empty">
+      <div class="empty-icon">🚀</div>
+      <h3>No websites yet</h3>
+      <p>Generate your first AI-powered website in under 3 minutes.</p>
+      <button class="empty-btn" onclick="window.location.href='/'">✨ Create My First Website</button>
+    </div>`;
+  }
+
+  function renderSiteCard(site) {
+    const date = new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const statusPill = site.published ? '<span class="pill live">● Live</span>' : '<span class="pill draft">○ Draft</span>';
+    const planPill = site.plan && site.plan !== 'free' ? '<span class="pill ' + site.plan + '">' + capitalize(site.plan) + '</span>' : '';
+    const publishBtn = !site.published
+      ? '<button class="action-btn publish" onclick="publishSite(\'' + site.id + '\')">🚀 Publish</button>'
+      : '<button class="action-btn view" onclick="window.open(\'/site/' + site.slug + '\',\'_blank\')">↗ View Live</button>';
+    return `
+      <div class="site-card">
+        <div class="site-preview" onclick="openEditor('${site.id}')">
+          <iframe srcdoc="${escapeAttr(site.html)}" sandbox="allow-same-origin"></iframe>
+          <div class="preview-overlay"><span>✏️ Edit Site</span></div>
+        </div>
+        <div class="site-info">
+          <div class="site-name">${escapeHtml(site.business_name)}</div>
+          <div class="site-meta">${statusPill}${planPill}<span class="site-date">${date}</span></div>
+          <div class="site-actions">
+            <button class="action-btn" onclick="openEditor('${site.id}')">✏️ Edit</button>
+            ${publishBtn}
+            ${site.slug ? '<button class="action-btn" onclick="copyLink(\'/site/' + site.slug + '\')">🔗</button>' : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function openEditor(siteId) { window.location.href = '/?edit=' + siteId; }
+  function publishSite(siteId) { sessionStorage.setItem('pendingSiteId', siteId); window.location.href = '/pricing'; }
+  function copyLink(path) { navigator.clipboard.writeText(window.location.origin + path).then(() => showToast('Link copied!')); }
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid #10B981;border-radius:12px;padding:1rem 1.5rem;color:#F1F5F9;font-size:.9rem;font-weight:500;z-index:9999';
+    t.textContent = '✅ ' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+  function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Free'; }
+  function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escapeAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+</script>
+</body>
+</html>
