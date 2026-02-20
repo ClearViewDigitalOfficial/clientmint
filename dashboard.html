@@ -23,8 +23,8 @@
     #navEmail{font-size:.8rem;color:var(--tm)}
     .main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:2.5rem 5%}
     .welcome{margin-bottom:2rem}.welcome h1{font-family:'Inter',sans-serif;font-size:2rem;font-weight:800;margin-bottom:.3rem;letter-spacing:-1px}.welcome p{color:var(--tm);font-size:.9rem}
-    .tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--b)}
-    .tab{padding:.6rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tm);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-bottom:-1px}
+    .tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--b);overflow-x:auto}
+    .tab{padding:.6rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tm);font-size:.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-bottom:-1px;white-space:nowrap}
     .tab.active{color:var(--pl);border-bottom-color:var(--pl)}
     .tab:hover:not(.active){color:var(--t)}
     .tab-content{display:none}.tab-content.active{display:block}
@@ -33,10 +33,10 @@
     .stat-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--tm);margin-bottom:.4rem}
     .stat-val{font-family:'Inter',sans-serif;font-size:1.75rem;font-weight:800;color:var(--t)}
     .stat-val.green{color:var(--g)}.stat-val.purple{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .upgrade-banner{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(20,184,166,.1));border:1px solid rgba(99,102,241,.25);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .upgrade-banner{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(20,184,166,.1));border:1px solid rgba(99,102,241,.25);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     .upgrade-banner p{font-size:.9rem;color:var(--t)}.upgrade-banner p span{color:var(--pl);font-weight:600}
     .upgrade-banner-btn{padding:.5rem 1.2rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
-    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
     .section-head h2{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-.5px}
     .new-btn{padding:.5rem 1.1rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .25s}
     .new-btn:hover{box-shadow:0 8px 25px rgba(99,102,241,.4)}
@@ -57,8 +57,9 @@
     .pill.pro{background:rgba(99,102,241,.12);color:var(--pl);border:1px solid rgba(99,102,241,.25)}
     .pill.business{background:rgba(20,184,166,.12);color:var(--a);border:1px solid rgba(20,184,166,.25)}
     .site-date{font-size:.72rem;color:var(--tm)}
-    .site-actions{display:flex;gap:.4rem}
-    .abtn{flex:1;padding:.5rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm)}
+    .site-url{font-size:.72rem;color:var(--pl);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:.6rem;display:block}
+    .site-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+    .abtn{flex:1;min-width:0;padding:.5rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm);white-space:nowrap}
     .abtn:hover{border-color:var(--bg2);color:var(--t)}
     .abtn.pub{background:linear-gradient(135deg,var(--g),#059669);color:#fff;border:none}
     .abtn.view{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none}
@@ -68,12 +69,25 @@
     .sub-table th,.sub-table td{padding:.65rem .75rem;text-align:left;border-bottom:1px solid var(--b);font-size:.82rem}
     .sub-table th{color:var(--tm);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
     .sub-table td{color:var(--t)}
-    .sub-table tr:hover{background:rgba(99,102,241,.03)}
+    .sub-table tr:hover td{background:rgba(99,102,241,.03)}
     .empty{text-align:center;padding:4rem 2rem;background:var(--card);border:1px solid var(--b);border-radius:16px}
     .empty-icon{font-size:3rem;margin-bottom:.75rem}
     .empty h3{font-family:'Inter',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:.4rem}
     .empty p{color:var(--tm);margin-bottom:1.5rem;font-size:.9rem}
     .empty-btn{padding:.75rem 1.75rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer}
+    .billing-card{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:1.75rem;margin-bottom:1rem;backdrop-filter:blur(20px)}
+    .billing-card h3{font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.25rem;letter-spacing:-.3px}
+    .billing-row{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--b);font-size:.875rem}
+    .billing-row:last-child{border-bottom:none}
+    .billing-label{color:var(--tm)}
+    .billing-val{color:var(--t);font-weight:600}
+    .billing-actions{display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap}
+    .bill-btn{padding:.65rem 1.4rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm)}
+    .bill-btn:hover{border-color:var(--bg2);color:var(--t)}
+    .bill-btn.upgrade{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none}
+    .bill-btn.upgrade:hover{box-shadow:0 8px 25px rgba(99,102,241,.4)}
+    .bill-btn.danger{border-color:rgba(239,68,68,.2);color:var(--r)}
+    .bill-btn.danger:hover{background:rgba(239,68,68,.08)}
     .spinner-wrap{text-align:center;padding:4rem}
     .spinner{width:40px;height:40px;border:3px solid var(--b);border-top-color:var(--p);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -81,11 +95,14 @@
     .auth-gate h2{font-family:'Inter',sans-serif;font-size:2rem;margin-bottom:.75rem;letter-spacing:-1px}
     .auth-gate p{color:var(--tm);margin-bottom:2rem}
     .auth-gate a{padding:.9rem 2.5rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border-radius:12px;font-weight:700;text-decoration:none;display:inline-block}
-    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.tabs{overflow-x:auto}}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid #10B981;border-radius:12px;padding:.85rem 1.25rem;color:#F1F5F9;font-size:.85rem;font-weight:500;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}}
   </style>
 </head>
 <body>
 <div class="bg"><div class="mesh"></div><div class="grid"></div></div>
+<div class="toast" id="toast"></div>
 <nav>
   <a href="/" class="logo"><div class="logo-mark">⚡</div>Client<span>Mint</span></a>
   <div class="nav-links"><a href="/">Home</a><a href="/pricing">Pricing</a><a href="/dashboard" class="active">Dashboard</a></div>
@@ -103,19 +120,16 @@
   let allSites = [];
   let activeTab = 'sites';
 
-  // Fix: use onAuthStateChange to reliably catch Google OAuth redirects
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (session && session.user) {
       currentUser = session.user;
       document.getElementById('navEmail').textContent = session.user.email;
       await loadDashboard();
     } else if (!currentUser) {
-      // No session after waiting — show auth gate
       showAuthGate();
     }
   });
 
-  // Also try getSession on load as fallback
   window.addEventListener('load', async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session && session.user && !currentUser) {
@@ -123,17 +137,14 @@
       document.getElementById('navEmail').textContent = session.user.email;
       await loadDashboard();
     } else if (!session) {
-      // Give onAuthStateChange 2 seconds to fire before showing gate
-      setTimeout(() => {
-        if (!currentUser) showAuthGate();
-      }, 2000);
+      setTimeout(() => { if (!currentUser) showAuthGate(); }, 2000);
     }
   });
 
   async function signOut() { await supabase.auth.signOut(); window.location.href = '/'; }
 
   function showAuthGate() {
-    document.getElementById('mainContent').innerHTML = '<div class="auth-gate"><h2>Sign in to continue</h2><p>Manage your websites, view form submissions, and configure domains.</p><a href="/">Go to ClientMint →</a></div>';
+    document.getElementById('mainContent').innerHTML = '<div class="auth-gate"><h2>Sign in to continue</h2><p>Manage your websites, view form submissions, and configure your billing.</p><a href="/">Go to ClientMint →</a></div>';
   }
 
   async function loadDashboard() {
@@ -158,12 +169,12 @@
 
     const upgradeBanner = isFree ? `
       <div class="upgrade-banner">
-        <p>🚀 Free plan: <span>${usage.remaining || 0} AI edits</span> remaining this month · 1 website max · No publishing</p>
+        <p>🚀 Free plan: <span>${usage.remaining || 0} AI edits</span> remaining · Upgrade to publish your site live</p>
         <button class="upgrade-banner-btn" onclick="window.location.href='/pricing'">Upgrade to Pro →</button>
       </div>` : '';
 
     mc.innerHTML = `
-      <div class="welcome"><h1>Dashboard 👋</h1><p>${currentUser.email} · ${cap(plan)} Plan</p></div>
+      <div class="welcome"><h1>Dashboard 👋</h1><p>${esc(currentUser.email)} · ${cap(plan)} Plan</p></div>
       ${upgradeBanner}
       <div class="stats">
         <div class="stat-card"><div class="stat-label">Websites</div><div class="stat-val purple">${sites.length}</div></div>
@@ -172,12 +183,16 @@
         <div class="stat-card"><div class="stat-label">Plan</div><div class="stat-val" style="font-size:1.3rem;margin-top:.15rem">${cap(plan)}</div></div>
       </div>
       <div class="tabs">
-        <button class="tab active" onclick="switchTab('sites', this)">🌐 My Sites</button>
-        <button class="tab" onclick="switchTab('submissions', this)">📬 Form Submissions</button>
-        <button class="tab" onclick="switchTab('domains', this)">🔗 Domains</button>
+        <button class="tab active" onclick="switchTab('sites',this)">🌐 My Sites</button>
+        <button class="tab" onclick="switchTab('submissions',this)">📬 Form Submissions</button>
+        <button class="tab" onclick="switchTab('domains',this)">🔗 Domains</button>
+        <button class="tab" onclick="switchTab('billing',this)">💳 Billing</button>
       </div>
       <div class="tab-content active" id="tab-sites">
-        <div class="section-head"><h2>Your Websites</h2><button class="new-btn" onclick="window.location.href='/'">+ New Site</button></div>
+        <div class="section-head">
+          <h2>Your Websites</h2>
+          <button class="new-btn" onclick="window.location.href='/'">+ New Site</button>
+        </div>
         ${sites.length === 0 ? renderEmpty() : '<div class="sites-grid">' + sites.map(renderSiteCard).join('') + '</div>'}
       </div>
       <div class="tab-content" id="tab-submissions">
@@ -185,12 +200,75 @@
       </div>
       <div class="tab-content" id="tab-domains">
         <div class="section-head"><h2>Custom Domains</h2></div>
-        ${sites.filter(s=>s.custom_domain).length === 0
-          ? '<div class="empty"><div class="empty-icon">🔗</div><h3>No custom domains yet</h3><p>Connect a custom domain to any published Pro or Business site.</p></div>'
-          : sites.filter(s=>s.custom_domain).map(s => `<div class="stat-card" style="margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${esc(s.custom_domain)}</strong><div style="font-size:.75rem;color:var(--tm)">${esc(s.business_name)} · Status: ${s.domain_status||'pending'}</div></div><span class="pill ${s.domain_status==='active'?'live':'draft'}">${s.domain_status||'pending'}</span></div></div>`).join('')
-        }
+        ${renderDomainsTab(sites, plan)}
+      </div>
+      <div class="tab-content" id="tab-billing">
+        ${renderBillingTab(plan, usage)}
       </div>
     `;
+  }
+
+  function renderDomainsTab(sites, plan) {
+    if (plan === 'free') {
+      return `<div class="empty"><div class="empty-icon">🔗</div><h3>Custom domains on Pro & Business</h3><p>Connect your own domain (e.g. yourbusiness.com) to your published site. Available on Pro and Business plans.</p><button class="empty-btn" onclick="window.location.href='/pricing'">Upgrade to Connect a Domain →</button></div>`;
+    }
+    const domainSites = sites.filter(s => s.custom_domain);
+    if (domainSites.length === 0) {
+      return `<div class="empty"><div class="empty-icon">🔗</div><h3>No custom domains yet</h3><p>Click the 🌐 button on any published site card to connect your domain.</p></div>`;
+    }
+    return domainSites.map(s => `
+      <div class="stat-card" style="margin-bottom:.75rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+          <div>
+            <strong>${esc(s.custom_domain)}</strong>
+            <div style="font-size:.75rem;color:var(--tm);margin-top:.2rem">${esc(s.business_name)} · Status: ${s.domain_status || 'pending'}</div>
+          </div>
+          <span class="pill ${s.domain_status === 'active' ? 'live' : 'draft'}">${s.domain_status || 'pending'}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderBillingTab(plan, usage) {
+    const isFree = plan === 'free';
+    const planDisplay = cap(plan);
+    const editInfo = `${usage.editCount || 0} / ${usage.editLimit || 3} used this month`;
+
+    if (isFree) {
+      return `
+        <div class="billing-card">
+          <h3>Current Plan</h3>
+          <div class="billing-row"><span class="billing-label">Plan</span><span class="billing-val">Free</span></div>
+          <div class="billing-row"><span class="billing-label">AI Edits</span><span class="billing-val">${editInfo}</span></div>
+          <div class="billing-row"><span class="billing-label">Publishing</span><span class="billing-val" style="color:var(--tm)">Not included</span></div>
+          <div class="billing-row"><span class="billing-label">Custom Domain</span><span class="billing-val" style="color:var(--tm)">Not included</span></div>
+          <div class="billing-actions">
+            <button class="bill-btn upgrade" onclick="window.location.href='/pricing'">⬆ Upgrade to Pro — $9/mo</button>
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="billing-card">
+        <h3>Current Plan</h3>
+        <div class="billing-row"><span class="billing-label">Plan</span><span class="billing-val">${planDisplay}</span></div>
+        <div class="billing-row"><span class="billing-label">AI Edits</span><span class="billing-val">${editInfo}</span></div>
+        <div class="billing-row"><span class="billing-label">Status</span><span class="billing-val" style="color:var(--g)">✓ Active</span></div>
+        <div class="billing-actions">
+          <button class="bill-btn upgrade" onclick="window.location.href='/pricing'">⬆ Change Plan</button>
+          <button class="bill-btn danger" onclick="cancelPlan()">Cancel Subscription</button>
+        </div>
+      </div>
+      <div class="billing-card" style="background:rgba(15,23,42,.4)">
+        <h3>Need help with billing?</h3>
+        <p style="color:var(--tm);font-size:.875rem;margin-bottom:1rem">To update your payment method, download invoices, or manage your subscription, contact us and we'll handle it immediately.</p>
+        <a href="mailto:hello@clientmint.com?subject=Billing Help" style="color:var(--pl);font-size:.875rem;font-weight:600">📧 hello@clientmint.com</a>
+      </div>`;
+  }
+
+  function cancelPlan() {
+    if (confirm('Are you sure you want to cancel? Your site will go offline at the end of your billing period.\n\nEmail hello@clientmint.com to cancel or manage your subscription.')) {
+      window.location.href = 'mailto:hello@clientmint.com?subject=Cancel Subscription&body=Please cancel my ClientMint subscription for ' + (currentUser?.email || '');
+    }
   }
 
   function switchTab(tab, el) {
@@ -208,36 +286,53 @@
       const subs = await res.json();
       const el = document.getElementById('submissionsContent');
       if (!subs || subs.length === 0) {
-        el.innerHTML = '<div class="empty"><div class="empty-icon">📬</div><h3>No submissions yet</h3><p>When visitors submit your contact forms, they\'ll appear here.</p></div>';
+        el.innerHTML = '<div class="empty"><div class="empty-icon">📬</div><h3>No submissions yet</h3><p>When visitors fill out the contact form on your published site, their messages will appear here.</p></div>';
         return;
       }
-      el.innerHTML = `<div style="background:var(--card);border:1px solid var(--b);border-radius:14px;overflow:hidden"><table class="sub-table">
-        <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Site</th></tr></thead>
-        <tbody>${subs.map(s => `<tr>
-          <td>${new Date(s.created_at).toLocaleDateString()}</td>
-          <td>${esc(s.name||'-')}</td>
-          <td>${esc(s.email||'-')}</td>
-          <td>${esc(s.phone||'-')}</td>
-          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.message||'-')}</td>
-          <td>${esc(s.site_slug||'-')}</td>
-        </tr>`).join('')}</tbody>
-      </table></div>`;
+      el.innerHTML = `
+        <div class="section-head"><h2>Form Submissions</h2><span style="color:var(--tm);font-size:.85rem">${subs.length} total</span></div>
+        <div style="background:var(--card);border:1px solid var(--b);border-radius:14px;overflow:hidden;overflow-x:auto">
+          <table class="sub-table">
+            <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Site</th></tr></thead>
+            <tbody>${subs.map(s => `<tr>
+              <td style="white-space:nowrap">${new Date(s.created_at).toLocaleDateString()}</td>
+              <td>${esc(s.name || '-')}</td>
+              <td><a href="mailto:${esc(s.email)}" style="color:var(--pl)">${esc(s.email || '-')}</a></td>
+              <td>${esc(s.phone || '-')}</td>
+              <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(s.message || '')}">${esc(s.message || '-')}</td>
+              <td style="font-size:.75rem;color:var(--tm)">${esc(s.site_slug || '-')}</td>
+            </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
     } catch(e) {
       document.getElementById('submissionsContent').innerHTML = '<p style="color:var(--r);padding:2rem">Failed to load submissions</p>';
     }
   }
 
   function renderEmpty() {
-    return '<div class="empty"><div class="empty-icon">🚀</div><h3>No websites yet</h3><p>Generate your first AI-powered website in under 3 minutes — free to start.</p><button class="empty-btn" onclick="window.location.href=\'\'">✨ Create My First Website</button></div>';
+    return `<div class="empty">
+      <div class="empty-icon">🚀</div>
+      <h3>No websites yet</h3>
+      <p>Generate your first AI-powered website in under 3 minutes — free to start.</p>
+      <button class="empty-btn" onclick="window.location.href='/'">✨ Create My First Website</button>
+    </div>`;
   }
 
   function renderSiteCard(site) {
     const date = new Date(site.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const status = site.published ? '<span class="pill live">● Live</span>' : '<span class="pill draft">○ Draft</span>';
     const planPill = site.plan && site.plan !== 'free' ? `<span class="pill ${site.plan}">${cap(site.plan)}</span>` : '';
+    const liveUrl = `${window.location.origin}/site/${site.slug}`;
+
     const pubBtn = !site.published
       ? `<button class="abtn pub" onclick="pubSite('${site.id}')">🚀 Publish</button>`
-      : `<button class="abtn view" onclick="window.open('/site/${site.slug}','_blank')">↗ Live</button>`;
+      : `<button class="abtn view" onclick="window.open('${liveUrl}','_blank')">↗ View Live</button>`;
+
+    const urlLine = site.published
+      ? `<a class="site-url" href="${liveUrl}" target="_blank" title="${liveUrl}">${liveUrl.replace('https://','')}</a>`
+      : `<span class="site-url" style="color:var(--tm);cursor:default">Not published yet</span>`;
+
     return `<div class="site-card">
       <div class="site-preview" onclick="openEditor('${site.id}')">
         <iframe srcdoc="${escAttr(site.html)}" sandbox="allow-same-origin"></iframe>
@@ -246,10 +341,11 @@
       <div class="site-info">
         <div class="site-name">${esc(site.business_name)}</div>
         <div class="site-meta">${status}${planPill}<span class="site-date">${date}</span></div>
+        ${urlLine}
         <div class="site-actions">
           <button class="abtn" onclick="openEditor('${site.id}')">✏️ Edit</button>
           ${pubBtn}
-          <button class="abtn" onclick="shareSite('${site.id}')" title="Copy link">🔗</button>
+          ${site.published ? `<button class="abtn" onclick="copyUrl('${liveUrl}')" title="Copy URL">🔗 Copy</button>` : ''}
           <button class="abtn" onclick="connectDomain('${site.id}')" title="Connect domain">🌐</button>
           <button class="abtn del" onclick="deleteSite('${site.id}','${esc(site.business_name)}')" title="Delete">🗑</button>
         </div>
@@ -260,49 +356,56 @@
   function openEditor(id) { window.location.href = '/?edit=' + id; }
   function pubSite(id) { sessionStorage.setItem('pendingSiteId', id); window.location.href = '/pricing'; }
 
+  function copyUrl(url) {
+    navigator.clipboard.writeText(url).then(() => toast('Link copied! ✅')).catch(() => {
+      prompt('Copy this URL:', url);
+    });
+  }
+
   async function deleteSite(id, name) {
     if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
     try {
-      await fetch('/api/delete-site', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ siteId: id, userId: currentUser.id }) });
-      toast('Site deleted ✅'); loadDashboard();
-    } catch(e) { toast('Delete failed', 'error'); }
-  }
-
-  async function shareSite(id) {
-    const site = allSites.find(s => s.id === id);
-    if (site && site.slug) {
-      navigator.clipboard.writeText(window.location.origin + '/site/' + site.slug);
-      toast('Link copied! ✅');
-    }
+      await fetch('/api/delete-site', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ siteId:id, userId:currentUser.id }) });
+      toast('Site deleted ✅');
+      loadDashboard();
+    } catch(e) { toast('Delete failed ❌', 'error'); }
   }
 
   async function connectDomain(id) {
+    const site = allSites.find(s => s.id === id);
+    if (!site?.published) { toast('Publish your site first before connecting a domain.', 'warn'); return; }
     const domain = prompt('Enter your custom domain (e.g., yourbusiness.com):');
     if (!domain) return;
     try {
       const res = await fetch('/api/domain-config', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ siteId: id, userId: currentUser.id, customDomain: domain })
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ siteId:id, userId:currentUser.id, customDomain:domain })
       });
       const data = await res.json();
-      if (res.status === 403) { alert(data.error + '\n\nUpgrade to Pro or Business to connect a custom domain.'); window.location.href='/pricing'; return; }
+      if (res.status === 403) {
+        alert(data.error + '\n\nUpgrade to connect a custom domain.');
+        window.location.href = '/pricing';
+        return;
+      }
       if (data.success) {
-        alert('Domain configured!\n\nAdd this DNS record at your registrar:\n\nType: ' + data.dns.type + '\nName: ' + data.dns.name + '\nValue: ' + data.dns.value + '\n\n' + data.dns.note);
+        alert('Domain configured! ✅\n\nAdd this DNS record at your domain registrar:\n\nType: CNAME\nName: ' + data.dns.name + '\nValue: ' + data.dns.value + '\n\n' + data.dns.note);
         loadDashboard();
       } else { alert(data.error || 'Failed'); }
     } catch(e) { alert('Error: ' + e.message); }
   }
 
   function toast(msg, type) {
-    const t = document.createElement('div');
-    t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid '+(type==='error'?'#EF4444':'#10B981')+';border-radius:12px;padding:.85rem 1.25rem;color:#F1F5F9;font-size:.85rem;font-weight:500;z-index:9999;animation:slideUp .3s ease';
+    const t = document.getElementById('toast');
     t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 3000);
+    t.style.borderColor = type === 'error' ? '#EF4444' : type === 'warn' ? '#F59E0B' : '#10B981';
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3000);
   }
-  function cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : 'Free'; }
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Free'; }
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escAttr(s) { return String(s || '').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 </script>
 </body>
 </html>
