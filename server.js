@@ -8,10 +8,10 @@ const PORT = process.env.PORT || 3000;
 const DOMAIN = process.env.DOMAIN || 'https://clientmint.onrender.com';
 
 const PLAN_LIMITS = {
-  free:     { edits: 5,   pages: 1, forms: false, domain: false, logo: false, seo: false },
-  pro:      { edits: 100, pages: 1, forms: true,  domain: true,  logo: true,  seo: true  },
-  business: { edits: 500, pages: 10,forms: true,  domain: true,  logo: true,  seo: true  },
-  agency:   { edits: 750, pages: 10,forms: true,  domain: true,  logo: true,  seo: true  }
+  free:     { edits: 3,   generates: 1, forms: false, domain: false, logo: false },
+  pro:      { edits: 100, generates: 99, forms: true,  domain: true,  logo: true  },
+  business: { edits: 500, generates: 99, forms: true,  domain: true,  logo: true  },
+  agency:   { edits: 750, generates: 99, forms: true,  domain: true,  logo: true  }
 };
 
 const rateLimits = {};
@@ -137,7 +137,14 @@ async function getUserPlan(userId) {
 async function getMonthlyEditCount(userId) {
   const start = new Date(new Date().getFullYear(),new Date().getMonth(),1).toISOString();
   try {
-    const r = await supabaseRequest('GET','edit_logs?user_id=eq.'+userId+'&created_at=gte.'+start+'&select=id');
+    const r = await supabaseRequest('GET','edit_logs?user_id=eq.'+userId+'&created_at=gte.'+start+'&edit_type=eq.ai_edit&select=id');
+    return Array.isArray(r.data) ? r.data.length : 0;
+  } catch(e) { return 0; }
+}
+
+async function getTotalSiteCount(userId) {
+  try {
+    const r = await supabaseRequest('GET','sites?user_id=eq.'+userId+'&select=id');
     return Array.isArray(r.data) ? r.data.length : 0;
   } catch(e) { return 0; }
 }
@@ -152,78 +159,101 @@ async function saveVersion(siteId, html, desc) {
   catch(e) { console.error('Save version fail:', e.message); }
 }
 
-// ─── PROMPTS ────────────────────────────────────────────────
+// ─── WORLD-CLASS AI PROMPT ──────────────────────────────────
 
 function genPrompt(name, desc, opts) {
   const style = (opts&&opts.style)||{};
-  return `Create a stunning, professional single-page website for "${name}".
+  const colorScheme = style.colorScheme || '';
+  const font = style.font || '';
+
+  return `You are an elite web designer. Create a STUNNING, world-class single-page website for "${name}".
 
 Business: ${desc}
 
-Generate a complete HTML page with:
-1. Sticky nav with business name as text logo + links (Home, About, Services, Contact)
-2. Hero section: compelling headline, subheadline, gradient CTA button
-3. Services section: 6 cards with unicode icons (use ⚡📊🎯🔒💡🚀✨📱💼🎨)
-4. About section with company story
-5. Testimonials: 3 realistic ones with names & titles
-6. Contact section with a WORKING form
-7. Footer with business name, nav links, copyright 2025
+This website must look like it was built by a top-tier agency charging $10,000. Every detail must be perfect.
 
-SEO — include ALL of these:
-- <title> with business name + primary keyword
-- <meta name="description" content="..."> (155 chars)
-- <meta name="keywords" content="..."> (5-8 keywords)
-- <meta property="og:title" content="...">
-- <meta property="og:description" content="...">
-- <meta property="og:type" content="website">
+DESIGN REQUIREMENTS:
+${colorScheme ? `Colors: ${colorScheme}` : 'Choose bold, industry-appropriate colors. Use a strong primary color with excellent contrast. Never use boring gray-on-white.'}
+${font ? `Font: Import ${font} from Google Fonts` : 'Import 2 Google Fonts — a bold display font for headings and a clean sans-serif for body text.'}
+- Dark, rich backgrounds OR bold colorful design — never plain white
+- Large, bold typography (headings 60px+)
+- Generous whitespace and padding (sections minimum 100px padding)
+- Smooth CSS animations (fade in, slide up on scroll using IntersectionObserver)
+- Gradient accents, colored glows, subtle shadows
+- Cards with hover effects (transform, box-shadow transitions)
+- Modern border-radius (16px-24px on cards)
+- CSS custom properties for consistent theming
+
+REQUIRED SECTIONS (in order):
+1. NAVIGATION — sticky, glass-morphism (backdrop-filter blur), logo left + links right + CTA button
+2. HERO — Full viewport height. Massive headline (60px+), compelling subheadline, 2 CTA buttons (primary + secondary), animated background gradient or geometric shapes using pure CSS
+3. SOCIAL PROOF BAR — 3-4 key stats (e.g., "500+ Clients", "4.9★ Rating", "10 Years Experience") with large numbers
+4. SERVICES/FEATURES — 6 cards in a grid. Each card: large emoji icon, bold title, 2-line description. Cards must have hover animation.
+5. HOW IT WORKS — 3 steps with numbered circles, icons, and descriptions
+6. TESTIMONIALS — 3 testimonials with realistic full names, job titles, company names, star ratings. Use quote marks. Card design.
+7. CTA SECTION — Bold full-width section with contrasting background, compelling headline, and button
+8. CONTACT — Working contact form (name, email, phone, message, submit button) with styled inputs
+9. FOOTER — Logo, tagline, nav links, contact info, copyright 2025
+
+SEO REQUIREMENTS (include ALL):
+- <title>${name} | [Primary Service] | [City if applicable]</title>
+- <meta name="description" content="...155 chars...">
+- <meta property="og:title">, <meta property="og:description">, <meta property="og:type" content="website">
 - <meta name="viewport" content="width=device-width, initial-scale=1.0">
-- Semantic HTML5 (header, main, section, footer, nav)
-- <script type="application/ld+json"> with LocalBusiness schema
+- Semantic HTML5: <header>, <main>, <section>, <footer>, <nav>
+- <script type="application/ld+json"> with complete LocalBusiness schema including name, description, url
 
-Design:
-${style.colorScheme ? '- Colors: '+style.colorScheme : '- Modern, industry-appropriate colors'}
-${style.font ? '- Font: '+style.font : '- Google Font pairing (heading + body)'}
-- Fully responsive (768px + 480px breakpoints)
-- CSS scroll-behavior: smooth
-- IntersectionObserver fade-in animations
-- Solid CSS gradients/patterns for visual interest (NO external images)
-- Professional copywriting, generous padding
-- Button hover effects + transitions
-- Styled form inputs with focus states
-
-CONTACT FORM — use this exact structure:
+CONTACT FORM — use EXACTLY this JS:
 <form id="contact-form">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="email" name="email" placeholder="Email Address" required>
-  <input type="tel" name="phone" placeholder="Phone (optional)">
-  <textarea name="message" placeholder="Your Message" required></textarea>
+  <input type="tel" name="phone" placeholder="Phone Number">
+  <textarea name="message" placeholder="Tell us about your project..." required></textarea>
   <button type="submit">Send Message</button>
 </form>
 <script>
 document.getElementById('contact-form').addEventListener('submit',function(e){
   e.preventDefault();
   var fd=new FormData(this);var data=Object.fromEntries(fd);
-  var btn=this.querySelector('button');btn.textContent='Sending...';btn.disabled=true;
+  var btn=this.querySelector('button[type=submit]');btn.textContent='Sending...';btn.disabled=true;
   fetch('/__forms/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(function(r){return r.json()}).then(function(){
-    document.getElementById('contact-form').innerHTML='<div style="text-align:center;padding:2rem"><h3 style="color:#10B981">✓ Message Sent!</h3><p>We\\'ll get back to you shortly.</p></div>';
-  }).catch(function(){alert('Message sent!');});
+    document.getElementById('contact-form').innerHTML='<div style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">✓</div><h3>Message Sent!</h3><p>We\\'ll be in touch within 24 hours.</p></div>';
+  }).catch(function(){btn.textContent='Send Message';btn.disabled=false;alert('Please try again.');});
 });
 </script>
 
-Return ONLY the complete HTML. No markdown. No code blocks. No explanations.`;
+ANIMATIONS — include ALL of these:
+- IntersectionObserver that adds class "visible" when sections scroll into view
+- CSS: .fade-in { opacity:0; transform:translateY(30px); transition:opacity 0.6s ease, transform 0.6s ease; }
+- CSS: .fade-in.visible { opacity:1; transform:translateY(0); }
+- Staggered delays for grid items (.fade-in:nth-child(2) { transition-delay: 0.1s; } etc.)
+- Smooth scroll behavior
+- Navigation highlight on scroll (add active class to current section link)
+- Hover effects on ALL buttons and cards
+
+MOBILE RESPONSIVE:
+- Breakpoints at 1024px, 768px, 480px
+- Navigation collapses to hamburger menu on mobile with working toggle
+- Grid columns collapse: 3-col → 2-col → 1-col
+- Font sizes scale down proportionally
+- Hero padding reduces on mobile
+
+Return ONLY the complete HTML file. No markdown. No code blocks. No explanations. Start with <!DOCTYPE html>.`;
 }
 
 function logoPrompt(name, desc) {
-  return `Generate an SVG logo for "${name}". Business: ${desc||name}
+  return `Generate a professional SVG logo for "${name}". Business: ${desc||name}
 
-Create a clean, modern SVG logo:
-- Simple geometric icon + the business name text
-- 2-3 professional colors
-- Width 200px, height 60px
-- No complex filters, clean paths only
+Create a clean, modern, memorable SVG logo:
+- Simple geometric icon or lettermark + business name text
+- Professional color palette (2-3 colors max)
+- viewBox="0 0 200 60" width="200" height="60"
+- Clean vector paths, no raster images, no complex filters
+- The icon should be on the left, text on the right
+- Use a bold, modern font style for the text (simulate with SVG text)
 
-Return ONLY the <svg> tag. No markdown, no explanation.`;
+Return ONLY the complete <svg> element. No markdown, no explanation, nothing else.`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -245,7 +275,22 @@ const server = http.createServer(async (req, res) => {
     if (!businessName||!businessDescription) return json(res,400,{error:'Missing fields'});
 
     const rk = userId||req.socket.remoteAddress||'anon';
-    if (!checkRateLimit('gen:'+rk,3)) return json(res,429,{error:'Too many requests. Wait a minute.'});
+    if (!checkRateLimit('gen:'+rk,3,60000)) return json(res,429,{error:'Too many requests. Wait a minute.'});
+
+    // Enforce free tier: 1 site only
+    if (userId) {
+      const plan = await getUserPlan(userId);
+      if (plan === 'free') {
+        const siteCount = await getTotalSiteCount(userId);
+        if (siteCount >= 1) {
+          return json(res,403,{
+            error:'Free plan includes 1 website. Upgrade to Pro for unlimited websites.',
+            upgradeRequired: true,
+            plan: 'free'
+          });
+        }
+      }
+    }
 
     const html = cleanHTML(await callAnthropic([{role:'user',content:genPrompt(businessName,businessDescription,options)}]));
 
@@ -270,25 +315,30 @@ const server = http.createServer(async (req, res) => {
     if (!currentHTML||!editInstruction) return json(res,400,{error:'Missing fields'});
 
     const rk = userId||req.socket.remoteAddress||'anon';
-    if (!checkRateLimit('edit:'+rk,10)) return json(res,429,{error:'Too many edits. Wait a minute.'});
+    if (!checkRateLimit('edit:'+rk,10,60000)) return json(res,429,{error:'Too many edits. Wait a minute.'});
 
     if (userId) {
       const plan = await getUserPlan(userId);
       const lim = PLAN_LIMITS[plan]||PLAN_LIMITS.free;
       const cnt = await getMonthlyEditCount(userId);
       if (cnt >= lim.edits) return json(res,403,{
-        error:'Monthly edit limit reached ('+lim.edits+'). Upgrade for more.',
-        editCount:cnt,editLimit:lim.edits,plan
+        error:'You\'ve used all ' + lim.edits + ' free AI edits. Upgrade to Pro for 100 edits/month.',
+        editCount:cnt, editLimit:lim.edits, plan,
+        upgradeRequired: true
       });
     }
 
     if (siteId) await saveVersion(siteId,currentHTML,'Before: '+editInstruction.substring(0,50));
 
     const msg = [{role:'user',content:
-      'You are an expert web developer editing a website. Current HTML:\n\n'+currentHTML+
+      'You are an elite web developer editing a stunning website. Current HTML:\n\n'+currentHTML+
       '\n\nChange requested: "'+editInstruction+'"\n\n'+
-      'KEEP: contact form JS, SEO meta tags, responsive design, all animations.\n'+
-      'Return COMPLETE updated HTML. No markdown. No code blocks.'
+      'Rules:\n'+
+      '- Keep ALL existing animations, IntersectionObserver code, and form submission JS\n'+
+      '- Keep ALL SEO meta tags and JSON-LD schema\n'+
+      '- Keep responsive CSS and mobile hamburger menu\n'+
+      '- Improve visual quality if possible while making the change\n'+
+      '- Return the COMPLETE updated HTML file. No markdown. No code blocks.'
     }];
     const html = cleanHTML(await callAnthropic(msg,8000));
 
@@ -305,12 +355,11 @@ const server = http.createServer(async (req, res) => {
     const {businessName,businessDescription,userId} = body;
     if (!businessName) return json(res,400,{error:'Missing business name'});
 
-    const rk = userId||'anon';
-    if (!checkRateLimit('logo:'+rk,3)) return json(res,429,{error:'Too many logo requests.'});
+    if (!checkRateLimit('logo:'+(userId||'anon'),3,60000)) return json(res,429,{error:'Too many logo requests.'});
 
     if (userId) {
       const plan = await getUserPlan(userId);
-      if (plan === 'free') return json(res,403,{error:'Logo generation requires Pro or Business plan.'});
+      if (plan === 'free') return json(res,403,{error:'Logo generation requires Pro or Business plan.',upgradeRequired:true});
     }
 
     let svg = await callAnthropic([{role:'user',content:logoPrompt(businessName,businessDescription)}],2000);
@@ -329,7 +378,13 @@ const server = http.createServer(async (req, res) => {
     const plan = await getUserPlan(userId);
     const lim = PLAN_LIMITS[plan]||PLAN_LIMITS.free;
     const cnt = await getMonthlyEditCount(userId);
-    return json(res,200,{plan,editCount:cnt,editLimit:lim.edits,remaining:Math.max(0,lim.edits-cnt),features:lim});
+    const siteCount = await getTotalSiteCount(userId);
+    return json(res,200,{
+      plan, editCount:cnt, editLimit:lim.edits,
+      remaining:Math.max(0,lim.edits-cnt),
+      siteCount, siteLimit: lim.generates,
+      features:lim
+    });
   }
 
   // ── VERSION HISTORY ─────────────────────────────────────
@@ -353,7 +408,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{html});
   }
 
-  // ── CONTACT FORM SUBMISSIONS ────────────────────────────
+  // ── CONTACT FORM ────────────────────────────────────────
   if (p === '/__forms/submit' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const ref = req.headers.referer||'';
@@ -382,7 +437,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,r.data||[]);
   }
 
-  // ── CUSTOM DOMAIN CONFIG ────────────────────────────────
+  // ── DOMAIN CONFIG ───────────────────────────────────────
   if (p === '/api/domain-config' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {siteId,userId,customDomain} = body;
@@ -390,14 +445,14 @@ const server = http.createServer(async (req, res) => {
     if (!/^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/.test(customDomain))
       return json(res,400,{error:'Invalid domain format'});
     const plan = await getUserPlan(userId);
-    if (!PLAN_LIMITS[plan].domain) return json(res,403,{error:'Custom domains require Pro or Business plan.'});
+    if (!PLAN_LIMITS[plan].domain) return json(res,403,{error:'Custom domains require Pro or Business plan.',upgradeRequired:true});
     await supabaseRequest('PATCH','sites?id=eq.'+siteId+'&user_id=eq.'+userId,{
       custom_domain:customDomain.toLowerCase(),domain_status:'pending_dns',updated_at:new Date().toISOString()
     });
     return json(res,200,{
       success:true,domain:customDomain.toLowerCase(),
       dns:{type:'CNAME',name:customDomain.toLowerCase(),value:'clientmint.onrender.com',
-        note:'Add this CNAME record at your registrar. Propagation takes 24-48h.'}
+        note:'Add this CNAME record at your domain registrar. DNS propagation takes 24-48 hours.'}
     });
   }
 
@@ -411,7 +466,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{shareUrl:DOMAIN+'/preview/'+token,token});
   }
 
-  // ── AGENCY: TRANSFER SITE ──────────────────────────────
+  // ── AGENCY: TRANSFER ────────────────────────────────────
   if (p === '/api/agency/transfer' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {siteId,userId,newOwnerEmail} = body;
@@ -423,7 +478,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{success:true,message:'Transfer initiated.'});
   }
 
-  // ── PREVIEW (agency share) ──────────────────────────────
+  // ── PREVIEW ─────────────────────────────────────────────
   if (p.startsWith('/preview/')) {
     const token = p.replace('/preview/','').split('/')[0];
     const r = await supabaseRequest('GET','sites?share_token=eq.'+token+'&limit=1');
@@ -470,7 +525,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{url:session.data.url});
   }
 
-  // ── WEBHOOK ─────────────────────────────────────────────
+  // ── STRIPE WEBHOOK ──────────────────────────────────────
   if (p === '/api/webhook' && req.method === 'POST') {
     const raw = await readBody(req);
     const sig = req.headers['stripe-signature'];
@@ -541,7 +596,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ── HEALTH ──────────────────────────────────────────────
-  if (p === '/health') return json(res,200,{ok:true,v:'2.0.0',stripe:!!process.env.STRIPE_SECRET_KEY,anthropic:!!process.env.ANTHROPIC_API_KEY});
+  if (p === '/health') return json(res,200,{ok:true,v:'2.1.0',stripe:!!process.env.STRIPE_SECRET_KEY,anthropic:!!process.env.ANTHROPIC_API_KEY,supabase:!!process.env.SUPABASE_URL});
 
   // ── STATIC FILES ────────────────────────────────────────
   const routes = {'/':'index.html','/pricing':'pricing.html','/dashboard':'dashboard.html','/success':'success.html'};
@@ -565,7 +620,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('ClientMint v2.0 on port '+PORT);
+  console.log('ClientMint v2.1 on port '+PORT);
   console.log('Stripe:',process.env.STRIPE_SECRET_KEY?'✅':'❌');
   console.log('Anthropic:',process.env.ANTHROPIC_API_KEY?'✅':'❌');
   console.log('Supabase:',process.env.SUPABASE_URL?'✅':'❌');
