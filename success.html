@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful — ClientMint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem}
+    .bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 20%,rgba(16,185,129,.18) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 50% 80%,rgba(99,102,241,.12) 0%,transparent 60%);pointer-events:none}
+    .card{position:relative;background:rgba(15,23,42,.8);border:1px solid rgba(16,185,129,.25);border-radius:24px;padding:3.5rem 3rem;max-width:480px;width:100%;backdrop-filter:blur(20px)}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(16,185,129,.6),transparent)}
+    .icon{font-size:4rem;margin-bottom:1.5rem;animation:bounce .6s ease}
+    @keyframes bounce{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+    h1{font-family:'Syne',sans-serif;font-size:2.25rem;font-weight:800;margin-bottom:.75rem}
+    .grad{background:linear-gradient(135deg,#6EE7B7,#10B981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    p{color:#94A3B8;line-height:1.7;margin-bottom:1.5rem}
+    .site-url{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:1rem;font-size:.9rem;color:#6EE7B7;word-break:break-all;margin-bottom:2rem;font-family:monospace}
+    .btn{display:inline-block;padding:.875rem 2rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;text-decoration:none;transition:all .25s;margin:.35rem;font-size:.95rem;cursor:pointer;border:none}
+    .btn-primary{background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff}
+    .btn-primary:hover{box-shadow:0 10px 30px rgba(99,102,241,.4);transform:translateY(-2px)}
+    .btn-ghost{background:transparent;border:1px solid rgba(148,163,184,.15);color:#94A3B8}
+    .btn-ghost:hover{border-color:rgba(99,102,241,.4);color:#F1F5F9}
+    .steps{text-align:left;margin:1.5rem 0}
+    .step{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem 0;border-bottom:1px solid rgba(148,163,184,.08)}
+    .step:last-child{border:none}
+    .step-num{width:24px;height:24px;background:linear-gradient(135deg,#6366F1,#14B8A6);border-radius:50%;display:grid;place-items:center;font-size:.7rem;font-weight:800;flex-shrink:0;color:#fff;margin-top:1px}
+    .step-text{font-size:.875rem;color:#94A3B8;line-height:1.5}
+    .step-text strong{color:#F1F5F9}
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="card">
+  <div class="icon">🎉</div>
+  <h1>You're <span class="grad">live!</span></h1>
+  <p>Payment confirmed. Your website is now published and live on the internet.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">✓</div><div class="step-text"><strong>Payment confirmed</strong> — your subscription is active</div></div>
+    <div class="step"><div class="step-num">✓</div><div class="step-text"><strong>Site published</strong> — your website is live at your URL</div></div>
+    <div class="step"><div class="step-num">→</div><div class="step-text"><strong>Go to dashboard</strong> to view your live URL and edit anytime</div></div>
+  </div>
+  <div id="siteUrlBlock" style="display:none">
+    <p style="margin-bottom:.5rem;font-size:.85rem">Your live site:</p>
+    <div class="site-url" id="siteUrl"></div>
+  </div>
+  <div>
+    <a href="/dashboard" class="btn btn-primary">Go to Dashboard →</a>
+    <a href="/" class="btn btn-ghost">Create Another Site</a>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://lgphbhtizcbmnsaecoje.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncGhiaHRpemNibW5zYWVjb2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTUyOTQsImV4cCI6MjA4NzA5MTI5NH0.8PemFAh7VHxHY4yWVXWqnrYtlHqxPq1kUj2cs0VgAKE';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  window.addEventListener('load', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const siteId = params.get('site_id');
+    if (!siteId) return;
+    let attempts = 0;
+    const check = setInterval(async () => {
+      attempts++;
+      try {
+        const { data } = await supabase.from('sites').select('slug,published').eq('id', siteId).single();
+        if ((data && data.published && data.slug) || attempts > 6) {
+          clearInterval(check);
+          if (data && data.slug) {
+            const url = window.location.origin + '/site/' + data.slug;
+            document.getElementById('siteUrl').textContent = url;
+            document.getElementById('siteUrlBlock').style.display = 'block';
+          }
+        }
+      } catch(e) { if (attempts > 6) clearInterval(check); }
+    }, 2000);
+  });
+</script>
+</body>
+</html>
