@@ -4,26 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — ClientMint</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    :root{
-      --p:#6366F1;--pl:#818CF8;--pd:#4F46E5;
-      --a:#14B8A6;--w:#F59E0B;--g:#10B981;
-      --t:#F1F5F9;--tm:#94A3B8;
-      --bg:#0A0F1E;--card:rgba(15,23,42,0.75);
-      --b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25);
-    }
+    :root{--p:#6366F1;--pl:#818CF8;--pd:#4F46E5;--a:#14B8A6;--w:#F59E0B;--g:#10B981;--t:#F1F5F9;--tm:#94A3B8;--bg:#0A0F1E;--card:rgba(15,23,42,0.75);--b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25)}
     html{scroll-behavior:smooth}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden}
     .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
     .mesh{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 15% -5%,rgba(99,102,241,.2) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 85% 105%,rgba(20,184,166,.12) 0%,transparent 55%)}
     .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.035) 1px,transparent 1px);background-size:60px 60px}
-    .noise{position:absolute;inset:0;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
     nav{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.5)}
-    .logo{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;display:flex;align-items:center;gap:.5rem}
-    .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:8px;display:grid;place-items:center;font-size:14px;-webkit-text-fill-color:white;flex-shrink:0}
+    .logo{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.5rem;letter-spacing:-.5px}
+    .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:8px;display:grid;place-items:center;font-size:14px;color:white;flex-shrink:0}
+    .logo span{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav-links{display:flex;align-items:center;gap:1.75rem}
     .nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
     .nav-links a:hover,.nav-links a.active{color:var(--t)}
@@ -35,7 +29,7 @@
     .badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);padding:.35rem .9rem;border-radius:100px;font-size:.75rem;font-weight:700;color:var(--pl);margin-bottom:1.75rem;letter-spacing:.3px}
     .badge .dot{width:6px;height:6px;background:var(--a);border-radius:50%;animation:blink 2s ease infinite}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-    h1{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:1.25rem}
+    h1{font-family:'Inter',sans-serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-3px;margin-bottom:1.25rem}
     .grad{background:linear-gradient(135deg,var(--pl) 0%,var(--a) 50%,#F472B6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .hero p{font-size:1.1rem;color:var(--tm);max-width:480px;margin:0 auto 2.5rem;line-height:1.7}
     .toggle-wrap{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:3.5rem}
@@ -44,18 +38,16 @@
     .tbtn.on{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.4)}
     .save-pill{background:linear-gradient(135deg,var(--g),#059669);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:100px}
     .cards{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1060px;margin:0 auto;padding:0 5% 3rem}
-    .card{position:relative;background:var(--card);border:1px solid var(--b);border-radius:22px;padding:2.25rem 1.875rem;backdrop-filter:blur(20px);transition:transform .3s,box-shadow .3s,border-color .3s;overflow:hidden}
-    .card::before{content:'';position:absolute;inset:0;border-radius:22px;opacity:0;transition:opacity .3s;background:radial-gradient(ellipse at 50% 0%,rgba(99,102,241,.07) 0%,transparent 65%)}
-    .card:hover::before{opacity:1}
+    .card{position:relative;background:var(--card);border:1px solid var(--b);border-radius:22px;padding:2.25rem 1.875rem;backdrop-filter:blur(20px);transition:transform .3s,box-shadow .3s,border-color .3s}
     .card:hover{transform:translateY(-5px);border-color:var(--bg2);box-shadow:0 25px 60px rgba(0,0,0,.35)}
     .card.hot{background:linear-gradient(150deg,rgba(35,25,90,.92) 0%,rgba(15,23,42,.95) 100%);border-color:rgba(99,102,241,.45);box-shadow:0 0 0 1px rgba(99,102,241,.15),0 30px 70px rgba(99,102,241,.18);transform:scale(1.03)}
     .card.hot:hover{transform:scale(1.03) translateY(-5px)}
     .card.hot::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pl),var(--a),transparent)}
     .pop-tag{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--p),var(--a));color:#fff;font-size:.68rem;font-weight:700;padding:.3rem 1.1rem;border-radius:0 0 10px 10px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
-    .plan-name{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tm);margin-bottom:.6rem}
+    .plan-name{font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tm);margin-bottom:.6rem}
     .card.hot .plan-name{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .price{display:flex;align-items:baseline;gap:.2rem;margin-bottom:.4rem}
-    .price-num{font-family:'Syne',sans-serif;font-size:3.25rem;font-weight:800;color:var(--t);line-height:1;transition:all .3s}
+    .price-num{font-family:'Inter',sans-serif;font-size:3.25rem;font-weight:900;color:var(--t);line-height:1;transition:all .3s;letter-spacing:-2px}
     .price-per{font-size:.875rem;color:var(--tm)}
     .price-note{font-size:.82rem;color:var(--tm);margin-bottom:1.75rem;min-height:1.1em}
     .orig-price{text-decoration:line-through;margin-right:.35rem;opacity:.5}
@@ -68,45 +60,42 @@
     .fi.y{background:rgba(16,185,129,.14);color:var(--g)}
     .fi.n{background:rgba(148,163,184,.07);color:var(--tm)}
     .card.hot .fi.y{background:rgba(99,102,241,.2);color:var(--pl)}
-    .cta-btn{width:100%;padding:.9rem;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.2px}
+    .cta-btn{width:100%;padding:.9rem;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.2px}
     .cta-btn.ghost{background:rgba(148,163,184,.06);border:1px solid var(--b);color:var(--tm)}
     .cta-btn.ghost:hover{background:rgba(148,163,184,.1);border-color:var(--bg2);color:var(--t)}
     .cta-btn.main{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;position:relative;overflow:hidden}
-    .cta-btn.main::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--pl),var(--a));opacity:0;transition:opacity .3s}
-    .cta-btn.main:hover::before{opacity:1}
     .cta-btn.main span{position:relative;z-index:1}
     .cta-btn.main:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(99,102,241,.45)}
     .agency-wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto 3rem;padding:0 5%}
     .agency{position:relative;border-radius:24px;padding:2.75rem;overflow:hidden;background:linear-gradient(135deg,rgba(20,15,55,.92) 0%,rgba(10,15,30,.96) 100%);border:1px solid rgba(245,158,11,.2);display:grid;grid-template-columns:1fr auto;gap:2.5rem;align-items:center}
     .agency::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.55),transparent)}
-    .agency-glow{position:absolute;top:-80px;right:-80px;width:350px;height:350px;background:radial-gradient(circle,rgba(245,158,11,.07) 0%,transparent 70%);pointer-events:none}
     .ag-tag{display:inline-flex;align-items:center;gap:.4rem;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);color:var(--w);font-size:.72rem;font-weight:700;padding:.28rem .75rem;border-radius:100px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.875rem}
-    .agency h2{font-family:'Syne',sans-serif;font-size:1.875rem;font-weight:800;margin-bottom:.6rem}
+    .agency h2{font-family:'Inter',sans-serif;font-size:1.875rem;font-weight:800;margin-bottom:.6rem;letter-spacing:-1px}
     .agency p{color:var(--tm);font-size:.92rem;line-height:1.65;margin-bottom:1.4rem;max-width:460px}
     .ag-perks{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
     .ag-perk{display:flex;align-items:center;gap:.45rem;font-size:.84rem;color:var(--tm)}
-    .ag-perk .check{color:var(--w);font-size:.7rem}
+    .ag-perk .check{color:var(--w)}
     .ag-price-col{text-align:center;min-width:180px;flex-shrink:0}
-    .ag-price{font-family:'Syne',sans-serif;font-size:3.75rem;font-weight:800;background:linear-gradient(135deg,var(--w),#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+    .ag-price{font-family:'Inter',sans-serif;font-size:3.75rem;font-weight:900;background:linear-gradient(135deg,var(--w),#FBBF24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:-2px}
     .ag-price-sub{font-size:.82rem;color:var(--tm);margin-bottom:1.25rem}
-    .ag-btn{width:100%;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--w),#D97706);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .25s;white-space:nowrap}
+    .ag-btn{width:100%;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--w),#D97706);color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .25s;white-space:nowrap}
     .ag-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(245,158,11,.35)}
     .domain-wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto 4.5rem;padding:0 5%}
     .domain{background:linear-gradient(135deg,rgba(20,184,166,.07) 0%,rgba(99,102,241,.05) 100%);border:1px solid rgba(20,184,166,.18);border-radius:18px;padding:1.875rem 2.25rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
     .domain-l{display:flex;align-items:center;gap:1.25rem}
     .domain-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--a),var(--p));border-radius:12px;display:grid;place-items:center;font-size:1.4rem;flex-shrink:0}
-    .domain-text h3{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:.2rem}
+    .domain-text h3{font-family:'Inter',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:.2rem}
     .domain-text p{font-size:.84rem;color:var(--tm)}
-    .domain-price{font-family:'Syne',sans-serif;font-size:2.25rem;font-weight:800;color:var(--a)}
+    .domain-price{font-family:'Inter',sans-serif;font-size:2.25rem;font-weight:900;color:var(--a);letter-spacing:-1px}
     .domain-price s{font-size:.95rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--tm);margin-left:.25rem}
     .faq-wrap{position:relative;z-index:1;max-width:660px;margin:0 auto 5rem;padding:0 5%}
-    .faq-title{font-family:'Syne',sans-serif;font-size:1.875rem;font-weight:800;text-align:center;margin-bottom:2.25rem}
+    .faq-title{font-family:'Inter',sans-serif;font-size:1.875rem;font-weight:800;text-align:center;margin-bottom:2.25rem;letter-spacing:-1px}
     .faq-item{border-bottom:1px solid var(--b)}
     .faq-q{width:100%;background:none;border:none;color:var(--t);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;text-align:left;padding:1.15rem 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:color .2s}
     .faq-q:hover{color:var(--pl)}
-    .faq-icon{width:22px;height:22px;border-radius:50%;background:var(--b);display:grid;place-items:center;flex-shrink:0;transition:all .3s;font-size:.75rem;color:var(--tm)}
-    .faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;font-size:.9rem;color:var(--tm);line-height:1.7}
-    .faq-a.open{max-height:200px}
+    .faq-icon{width:22px;height:22px;border-radius:50%;background:rgba(148,163,184,.08);display:grid;place-items:center;flex-shrink:0;transition:all .3s;font-size:.9rem;color:var(--tm);font-weight:400;line-height:1}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(0,1,0,1);font-size:.9rem;color:var(--tm);line-height:1.7}
+    .faq-item.open .faq-a{max-height:500px;transition:max-height .4s ease-in}
     .faq-a p{padding-bottom:1.25rem}
     .faq-item.open .faq-icon{background:rgba(99,102,241,.15);color:var(--pl);transform:rotate(45deg)}
     .toast{position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid var(--g);border-radius:12px;padding:1rem 1.5rem;color:var(--t);font-size:.9rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all .4s ease;max-width:300px}
@@ -121,24 +110,16 @@
     .fade2{animation:fadeUp .6s ease .1s both}
     .fade3{animation:fadeUp .6s ease .2s both}
     .fade4{animation:fadeUp .6s ease .3s both}
-    @media(max-width:900px){
-      .cards{grid-template-columns:1fr;max-width:440px}
-      .card.hot{transform:none}
-      .card.hot:hover{transform:translateY(-5px)}
-      .agency{grid-template-columns:1fr}
-      .ag-price-col{text-align:left}
-      .domain{flex-direction:column;align-items:flex-start}
-      .nav-links{display:none}
-    }
+    @media(max-width:900px){.cards{grid-template-columns:1fr;max-width:440px}.card.hot{transform:none}.agency{grid-template-columns:1fr}.ag-price-col{text-align:left}.domain{flex-direction:column;align-items:flex-start}.nav-links{display:none}}
   </style>
 </head>
 <body>
-<div class="bg"><div class="mesh"></div><div class="grid"></div><div class="noise"></div></div>
+<div class="bg"><div class="mesh"></div><div class="grid"></div></div>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><p>Redirecting to checkout…</p></div>
 <div class="toast" id="toast"></div>
 
 <nav>
-  <a href="/" class="logo"><div class="logo-mark">⚡</div>ClientMint</a>
+  <a href="/" class="logo"><div class="logo-mark">⚡</div>Client<span>Mint</span></a>
   <div class="nav-links">
     <a href="/">Home</a>
     <a href="/pricing" class="active">Pricing</a>
@@ -152,8 +133,8 @@
 
 <section class="hero fade1">
   <div class="badge"><span class="dot"></span> Simple, transparent pricing</div>
-  <h1>The website is free.<br><span class="grad">Going live isn't.</span></h1>
-  <p>Generate unlimited websites for free. Only pay when you're ready to publish and share with the world.</p>
+  <h1>Try it free.<br><span class="grad">Pay when you publish.</span></h1>
+  <p>Generate 1 website free with 3 AI edits to see the quality. Only pay when you're ready to go live.</p>
   <div class="toggle-wrap fade2">
     <div class="toggle">
       <button class="tbtn on" id="btnMonthly" onclick="setBilling('monthly')">Monthly</button>
@@ -163,22 +144,24 @@
 </section>
 
 <div class="cards fade3">
+  <!-- FREE -->
   <div class="card">
-    <div class="plan-name">Starter</div>
+    <div class="plan-name">Free</div>
     <div class="price"><span class="price-num">$0</span><span class="price-per">/mo</span></div>
     <div class="price-note">No credit card required</div>
     <hr class="div">
     <ul class="feats">
-      <li class="on"><span class="fi y">✓</span>Generate unlimited websites</li>
-      <li class="on"><span class="fi y">✓</span>Full AI editor access</li>
-      <li class="on"><span class="fi y">✓</span>Live preview of your site</li>
+      <li class="on"><span class="fi y">✓</span>1 AI-generated website</li>
+      <li class="on"><span class="fi y">✓</span>3 free AI edits to try it out</li>
+      <li class="on"><span class="fi y">✓</span>Full live preview of your site</li>
       <li class="off"><span class="fi n">✕</span>Publish to a live URL</li>
       <li class="off"><span class="fi n">✕</span>Custom domain</li>
       <li class="off"><span class="fi n">✕</span>Remove ClientMint badge</li>
     </ul>
-    <button class="cta-btn ghost" onclick="window.location.href='/'">Start for Free</button>
+    <button class="cta-btn ghost" onclick="window.location.href='/'">Try for Free</button>
   </div>
 
+  <!-- PRO (most popular) -->
   <div class="card hot">
     <div class="pop-tag">⚡ Most Popular</div>
     <div class="plan-name">Pro</div>
@@ -186,8 +169,8 @@
     <div class="price-note" id="proNote">Billed monthly · cancel anytime</div>
     <hr class="div">
     <ul class="feats">
-      <li class="on"><span class="fi y">✓</span>Everything in Starter</li>
-      <li class="on"><span class="fi y">✓</span>Publish to live URL instantly</li>
+      <li class="on"><span class="fi y">✓</span>Unlimited website generations</li>
+      <li class="on"><span class="fi y">✓</span>Publish to a live URL instantly</li>
       <li class="on"><span class="fi y">✓</span>100 AI edits per month</li>
       <li class="on"><span class="fi y">✓</span>Free subdomain included</li>
       <li class="on"><span class="fi y">✓</span>SSL certificate included</li>
@@ -196,6 +179,7 @@
     <button class="cta-btn main" onclick="handleCheckout('pro')"><span>Publish My Website →</span></button>
   </div>
 
+  <!-- BUSINESS -->
   <div class="card">
     <div class="plan-name">Business</div>
     <div class="price"><span class="price-num" id="bizPrice">$24</span><span class="price-per">/mo</span></div>
@@ -206,8 +190,8 @@
       <li class="on"><span class="fi y">✓</span>Up to 5 published websites</li>
       <li class="on"><span class="fi y">✓</span>500 AI edits per month</li>
       <li class="on"><span class="fi y">✓</span>Custom domain connection</li>
-      <li class="on"><span class="fi y">✓</span>Priority generation speed</li>
-      <li class="on"><span class="fi y">✓</span>Analytics dashboard</li>
+      <li class="on"><span class="fi y">✓</span>Priority AI generation</li>
+      <li class="on"><span class="fi y">✓</span>Form submission dashboard</li>
     </ul>
     <button class="cta-btn main" onclick="handleCheckout('business')"><span>Get Business →</span></button>
   </div>
@@ -215,24 +199,23 @@
 
 <div class="agency-wrap fade4">
   <div class="agency">
-    <div class="agency-glow"></div>
     <div>
       <div class="ag-tag">🏢 For Agencies</div>
-      <h2>Build sites for your clients.<br>Keep all the profit.</h2>
-      <p>White-labeled previews, unlimited website creation, and a simple per-publish model. Only pay when your client approves.</p>
+      <h2>Build sites for clients.<br>Keep all the profit.</h2>
+      <p>Resell AI-built websites to your clients. White-labeled previews, unlimited generation, and a simple per-publish model.</p>
       <div class="ag-perks">
-        <div class="ag-perk"><span class="check">✦</span>Unlimited website creation</div>
+        <div class="ag-perk"><span class="check">✦</span>Unlimited generations</div>
         <div class="ag-perk"><span class="check">✦</span>750 AI edits / month</div>
         <div class="ag-perk"><span class="check">✦</span>White-labeled previews</div>
-        <div class="ag-perk"><span class="check">✦</span>$24/mo per client site</div>
         <div class="ag-perk"><span class="check">✦</span>No ClientMint branding</div>
+        <div class="ag-perk"><span class="check">✦</span>Client share links</div>
         <div class="ag-perk"><span class="check">✦</span>Priority support</div>
       </div>
     </div>
     <div class="ag-price-col">
       <div class="ag-price">$49</div>
       <div class="ag-price-sub">/month base</div>
-      <button class="ag-btn" onclick="handleCheckout('agency')">Start Agency Plan →</button>
+      <button class="ag-btn" onclick="handleAgencyContact()">Contact Us →</button>
     </div>
   </div>
 </div>
@@ -243,7 +226,7 @@
       <div class="domain-icon">🌐</div>
       <div class="domain-text">
         <h3>Get your custom domain for just $1</h3>
-        <p>Premium .com, .io, .co domains — SSL included, auto-connects to your site. Only with any paid plan.</p>
+        <p>Premium .com, .io, .co domains — SSL included, auto-connects to your site. Available with any paid plan.</p>
       </div>
     </div>
     <div class="domain-price">$1 <s>$15</s></div>
@@ -252,25 +235,35 @@
 
 <div class="faq-wrap">
   <div class="faq-title">Common questions</div>
+
   <div class="faq-item">
-    <button class="faq-q" onclick="toggleFaq(this)">Can I really generate websites for free?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Yes, completely free. Generate as many websites as you want, use the AI editor, and preview everything — no credit card needed. You only pay when you want to publish live.</p></div>
+    <button class="faq-q" onclick="toggleFaq(this)">What do I get for free?<span class="faq-icon">+</span></button>
+    <div class="faq-a"><p>You get 1 AI-generated website and 3 free AI edits — enough to see exactly what you'll be getting before spending a cent. No credit card needed. When you're ready to publish it live and share it with the world, that's when you upgrade.</p></div>
   </div>
+
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">What does "published" mean?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>When published, your site gets a real URL like clientmint.onrender.com/site/your-business that anyone can visit. Live on the internet, accessible 24/7, hosted by us.</p></div>
+    <div class="faq-a"><p>Publishing makes your site live on the internet with a real URL like clientmint.onrender.com/site/your-business that anyone can visit 24/7. Without publishing, you can preview and edit your site but only you can see it.</p></div>
   </div>
+
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Absolutely. Cancel anytime with one click. Your site stays live until the end of your billing period. No questions asked, no cancellation fees.</p></div>
+    <div class="faq-a"><p>Absolutely. Cancel anytime with one click from your dashboard. Your site stays live until the end of your billing period — no surprise charges, no cancellation fees, no questions asked.</p></div>
   </div>
+
   <div class="faq-item">
-    <button class="faq-q" onclick="toggleFaq(this)">What's included in AI edits?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Describe changes in plain English — "make the hero blue", "add testimonials", "change the font" — and the AI rewrites your site instantly. Pro gets 100/month, Business gets 500/month.</p></div>
+    <button class="faq-q" onclick="toggleFaq(this)">What are AI edits?<span class="faq-icon">+</span></button>
+    <div class="faq-a"><p>AI edits let you change anything on your site by typing in plain English. "Make the colors blue", "Add a testimonials section", "Change the font to something modern" — the AI rewrites your site instantly. Pro gets 100/month, Business gets 500/month.</p></div>
   </div>
+
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Do I need to know how to code?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Not at all. Describe your business, watch the AI build it, describe changes in plain English, hit publish. Zero coding required.</p></div>
+    <div class="faq-a"><p>Not at all. Describe your business, watch the AI build a stunning website, make changes in plain English, then hit publish. Zero coding, zero design skills, zero technical knowledge required.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">How does the AI make the websites look good?<span class="faq-icon">+</span></button>
+    <div class="faq-a"><p>Our AI doesn't use templates. It generates a completely custom website from scratch for your specific business — custom colors, layout, copy, animations, and sections that fit your industry. Every site is unique.</p></div>
   </div>
 </div>
 
@@ -286,11 +279,25 @@
   };
   window.addEventListener('load', async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) { currentUser = session.user; document.getElementById('userEmailNav').textContent = session.user.email; document.getElementById('authNavBtn').textContent = 'Sign Out'; }
+    if (session) {
+      currentUser = session.user;
+      document.getElementById('userEmailNav').textContent = session.user.email;
+      document.getElementById('authNavBtn').textContent = 'Sign Out';
+    }
+    // Check if came from editor with a pending site
+    const pendingSiteId = sessionStorage.getItem('pendingSiteId');
+    if (pendingSiteId && currentUser) {
+      showToast('Choose a plan to publish your site!', 'info');
+    }
   });
   function handleAuthNav() {
-    if (currentUser) { supabase.auth.signOut().then(() => { currentUser = null; document.getElementById('userEmailNav').textContent = ''; document.getElementById('authNavBtn').textContent = 'Sign In'; }); }
-    else { window.location.href = '/'; }
+    if (currentUser) {
+      supabase.auth.signOut().then(() => {
+        currentUser = null;
+        document.getElementById('userEmailNav').textContent = '';
+        document.getElementById('authNavBtn').textContent = 'Sign In';
+      });
+    } else { window.location.href = '/'; }
   }
   function setBilling(b) {
     billing = b;
@@ -307,30 +314,44 @@
     }
   }
   async function handleCheckout(plan) {
-    if (!currentUser) { showToast('Please sign in first', 'warn'); setTimeout(() => window.location.href = '/', 1500); return; }
+    if (!currentUser) {
+      showToast('Sign in first to purchase', 'warn');
+      setTimeout(() => { sessionStorage.setItem('returnTo','pricing'); window.location.href = '/'; }, 1500);
+      return;
+    }
     let priceId;
     if (plan === 'pro') priceId = PRICES.pro[billing].id;
     if (plan === 'business') priceId = PRICES.business[billing].id;
-    if (plan === 'agency') priceId = PRICES.business.monthly.id;
-    let siteId = '';
-    try { const r = await fetch('/api/my-sites?userId=' + currentUser.id); const s = await r.json(); if (s && s[0]) siteId = s[0].id; } catch(e) {}
+    const siteId = sessionStorage.getItem('pendingSiteId') || '';
     document.getElementById('loadingOverlay').classList.add('show');
     try {
-      const res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId, userId: currentUser.id, userEmail: currentUser.email, siteId }) });
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, userId: currentUser.id, userEmail: currentUser.email, siteId })
+      });
       const data = await res.json();
-      if (data.url) { window.location.href = data.url; } else { throw new Error(data.error || 'No checkout URL'); }
-    } catch(err) { document.getElementById('loadingOverlay').classList.remove('show'); showToast('Error: ' + err.message, 'error'); }
+      if (data.url) { window.location.href = data.url; }
+      else { throw new Error(data.error || 'No checkout URL returned'); }
+    } catch(err) {
+      document.getElementById('loadingOverlay').classList.remove('show');
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+  function handleAgencyContact() {
+    window.location.href = 'mailto:hello@clientmint.com?subject=Agency Plan Inquiry&body=Hi, I am interested in the ClientMint Agency plan.';
   }
   function toggleFaq(btn) {
-    const item = btn.parentElement;
-    const ans = item.querySelector('.faq-a');
+    const item = btn.closest('.faq-item');
     const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i => { i.classList.remove('open'); i.querySelector('.faq-a').classList.remove('open'); });
-    if (!isOpen) { item.classList.add('open'); ans.classList.add('open'); }
+    // Close all
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    // Open clicked if it was closed
+    if (!isOpen) item.classList.add('open');
   }
   function showToast(msg, type) {
     const t = document.getElementById('toast');
-    t.textContent = (type === 'warn' ? '⚠️ ' : type === 'error' ? '❌ ' : '✅ ') + msg;
+    t.textContent = (type === 'warn' ? '⚠️ ' : type === 'error' ? '❌ ' : type === 'info' ? 'ℹ️ ' : '✅ ') + msg;
     t.style.borderColor = type === 'error' ? '#EF4444' : type === 'warn' ? '#F59E0B' : '#10B981';
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 4000);
