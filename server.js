@@ -1,4 +1,3 @@
-
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
@@ -756,7 +755,7 @@ const server = http.createServer(async (req, res) => {
   });
 
   // ── STATIC FILES ──────────────────────────────────────────────────────────────
-  const routes = {'/':'index.html','/pricing':'pricing.html','/dashboard':'dashboard.html','/success':'success.html'};
+  const routes = {'/':'index.html','/pricing':'pricing.html','/dashboard':'dashboard.html','/success':'success.html','/terms':'terms.html','/privacy':'privacy.html'};
   let fp = routes[p] ? path.join(__dirname,routes[p]) : path.join(__dirname,p);
   fs.readFile(fp, (err, data) => {
     if (err) {
