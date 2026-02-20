@@ -1,3 +1,4 @@
+
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
@@ -29,6 +30,116 @@ const MIME = {
   '.json':'application/json','.png':'image/png','.jpg':'image/jpeg',
   '.svg':'image/svg+xml','.ico':'image/x-icon','.xml':'application/xml','.txt':'text/plain'
 };
+
+// ─── INDUSTRY DETECTION ─────────────────────────────────────────────────────
+
+function detectIndustry(name, desc) {
+  const t = (name + ' ' + desc).toLowerCase();
+  if (/pizza|restaurant|cafe|bistro|diner|food|eat|dining|burger|sushi|taco|bbq|grill|bakery|pastry|catering/.test(t)) return { photo: 'restaurant food dining', video: 'restaurant food' };
+  if (/gym|fitness|workout|personal trainer|yoga|pilates|crossfit|martial arts|boxing|swimming/.test(t)) return { photo: 'gym fitness workout', video: 'fitness workout' };
+  if (/salon|hair|beauty|spa|nail|barber|grooming|wax|facial|skincare/.test(t)) return { photo: 'hair salon beauty', video: 'beauty salon' };
+  if (/law|attorney|legal|lawyer|counsel|litigation|firm/.test(t)) return { photo: 'law office professional', video: 'office professional' };
+  if (/dental|dentist|teeth|orthodont|oral/.test(t)) return { photo: 'dental clinic modern', video: 'dental clinic' };
+  if (/medical|doctor|clinic|health|therapy|physio|chiro|optom/.test(t)) return { photo: 'medical clinic health', video: 'medical health' };
+  if (/plumb|electric|hvac|roof|construct|contractor|handyman|remodel|renovation/.test(t)) return { photo: 'construction contractor work', video: 'construction work' };
+  if (/real estate|realtor|property|homes|mortgage|housing/.test(t)) return { photo: 'real estate luxury home', video: 'real estate home' };
+  if (/tech|software|app|saas|startup|digital|web|code|dev/.test(t)) return { photo: 'technology office modern', video: 'technology office' };
+  if (/hotel|motel|bnb|airbnb|lodge|resort|inn|hostel/.test(t)) return { photo: 'hotel luxury resort', video: 'hotel luxury' };
+  if (/retail|shop|store|boutique|fashion|clothing|apparel/.test(t)) return { photo: 'retail store boutique', video: 'shopping retail' };
+  if (/wedding|event|party|celebrat|plan|venue/.test(t)) return { photo: 'wedding event elegant', video: 'wedding celebration' };
+  if (/landscape|garden|lawn|tree|outdoor|mow/.test(t)) return { photo: 'landscaping garden outdoor', video: 'garden landscape' };
+  if (/clean|maid|janitorial|housekeep/.test(t)) return { photo: 'cleaning service home', video: 'cleaning service' };
+  if (/transport|taxi|car|auto|mechanic|detailing|tow/.test(t)) return { photo: 'automotive car service', video: 'car automotive' };
+  if (/pet|dog|cat|vet|animal|grooming/.test(t)) return { photo: 'pet dog cat veterinary', video: 'pet animals' };
+  if (/photography|photo|video|film|studio/.test(t)) return { photo: 'photography studio creative', video: 'photography creative' };
+  if (/education|tutor|school|training|course|coach|learn/.test(t)) return { photo: 'education learning professional', video: 'education learning' };
+  if (/finance|account|tax|bookkeep|invest|insurance/.test(t)) return { photo: 'finance professional business', video: 'finance business' };
+  return { photo: name + ' business professional', video: 'business professional office' };
+}
+
+// ─── PEXELS API ──────────────────────────────────────────────────────────────
+
+function pexelsPhoto(query) {
+  return new Promise((resolve) => {
+    if (!process.env.PEXELS_API_KEY) {
+      resolve(`https://picsum.photos/seed/${encodeURIComponent(query)}/1400/800`);
+      return;
+    }
+    const req = https.request({
+      hostname: 'api.pexels.com',
+      path: `/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=landscape`,
+      method: 'GET',
+      headers: { 'Authorization': process.env.PEXELS_API_KEY }
+    }, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(d);
+          const photos = json.photos || [];
+          if (photos.length === 0) {
+            resolve(`https://picsum.photos/seed/${encodeURIComponent(query)}/1400/800`);
+            return;
+          }
+          // Pick a random one from top 5 for variety
+          const pick = photos[Math.floor(Math.random() * photos.length)];
+          resolve(pick.src.large2x || pick.src.large || pick.src.original);
+        } catch {
+          resolve(`https://picsum.photos/seed/${encodeURIComponent(query)}/1400/800`);
+        }
+      });
+    });
+    req.on('error', () => resolve(`https://picsum.photos/seed/${encodeURIComponent(query)}/1400/800`));
+    req.end();
+  });
+}
+
+function pexelsVideo(query) {
+  return new Promise((resolve) => {
+    if (!process.env.PEXELS_API_KEY) {
+      resolve(null);
+      return;
+    }
+    const req = https.request({
+      hostname: 'api.pexels.com',
+      path: `/videos/search?query=${encodeURIComponent(query)}&per_page=5&orientation=landscape&size=medium`,
+      method: 'GET',
+      headers: { 'Authorization': process.env.PEXELS_API_KEY }
+    }, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(d);
+          const videos = json.videos || [];
+          if (videos.length === 0) { resolve(null); return; }
+          const pick = videos[Math.floor(Math.random() * videos.length)];
+          // Get the HD or SD file
+          const files = pick.video_files || [];
+          const hd = files.find(f => f.quality === 'hd') || files.find(f => f.quality === 'sd') || files[0];
+          resolve(hd ? hd.link : null);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.end();
+  });
+}
+
+// Fetch photo + video in parallel
+async function fetchPexelsMedia(businessName, businessDescription) {
+  const industry = detectIndustry(businessName, businessDescription);
+  const [heroPhoto, aboutPhoto, heroVideo] = await Promise.all([
+    pexelsPhoto(industry.photo),
+    pexelsPhoto(industry.photo + ' interior'),
+    pexelsVideo(industry.video)
+  ]);
+  return { heroPhoto, aboutPhoto, heroVideo, industry };
+}
+
+// ─── SUPABASE ────────────────────────────────────────────────────────────────
 
 function supabaseRequest(method, endpoint, body) {
   return new Promise((resolve, reject) => {
@@ -62,6 +173,8 @@ function makeSlug(name) {
     .replace(/-+/g,'-').trim().substring(0,40) + '-' + Math.random().toString(36).substring(2,7);
 }
 
+// ─── ANTHROPIC ───────────────────────────────────────────────────────────────
+
 function callAnthropic(messages, maxTokens) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:maxTokens||8000, messages});
@@ -86,6 +199,8 @@ function callAnthropic(messages, maxTokens) {
     req.write(payload); req.end();
   });
 }
+
+// ─── STRIPE ──────────────────────────────────────────────────────────────────
 
 function stripeRequest(method, endpoint, body) {
   return new Promise((resolve, reject) => {
@@ -159,51 +274,81 @@ async function saveVersion(siteId, html, desc) {
   catch(e) { console.error('Save version fail:', e.message); }
 }
 
-// ─── WORLD-CLASS AI PROMPT ──────────────────────────────────
+// ─── WORLD-CLASS AI PROMPT WITH REAL MEDIA ───────────────────────────────────
 
-function genPrompt(name, desc, opts) {
+function genPrompt(name, desc, opts, media) {
   const style = (opts&&opts.style)||{};
   const colorScheme = style.colorScheme || '';
   const font = style.font || '';
 
-  return `You are an elite web designer. Create a STUNNING, world-class single-page website for "${name}".
+  const { heroPhoto, aboutPhoto, heroVideo } = media || {};
+
+  // Build hero media block — video takes priority over photo
+  const heroMediaBlock = heroVideo
+    ? `HERO BACKGROUND: Use a fullscreen looping video background with this URL: "${heroVideo}"
+Use this HTML structure for the hero:
+<div class="hero-section">
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="${heroVideo}" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-content"><!-- headline + CTAs here --></div>
+</div>
+CSS for hero video:
+.hero-video { position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0; }
+.hero-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:1; }
+.hero-content { position:relative;z-index:2; }
+${heroPhoto ? `ALSO use this photo as the <img> in the About/Story section: "${heroPhoto}"` : ''}`
+    : `HERO BACKGROUND: Use this real Pexels photo as the hero background image: "${heroPhoto || 'https://picsum.photos/seed/business/1400/800'}"
+CSS: background-image: url('${heroPhoto}'); background-size:cover; background-position:center;
+Add a dark overlay: position an absolutely-positioned div with background:rgba(0,0,0,0.55) over it so text stays readable.
+${aboutPhoto ? `ABOUT/STORY SECTION: Use this real photo as an <img> tag: "${aboutPhoto}" — place it in a side-by-side layout with text on one side and the photo on the other.` : ''}`;
+
+  return `You are an elite web designer at a world-class agency. Create a STUNNING, completely unique single-page website for "${name}".
 
 Business: ${desc}
 
-This website must look like it was built by a top-tier agency charging $10,000. Every detail must be perfect.
+This website must look like it was built by a top agency charging $15,000. Every pixel must be intentional and perfect. Make it visually distinct — not a generic template.
 
-DESIGN REQUIREMENTS:
-${colorScheme ? `Colors: ${colorScheme}` : 'Choose bold, industry-appropriate colors. Use a strong primary color with excellent contrast. Never use boring gray-on-white.'}
-${font ? `Font: Import ${font} from Google Fonts` : 'Import 2 Google Fonts — a bold display font for headings and a clean sans-serif for body text.'}
-- Dark, rich backgrounds OR bold colorful design — never plain white
-- Large, bold typography (headings 60px+)
-- Generous whitespace and padding (sections minimum 100px padding)
-- Smooth CSS animations (fade in, slide up on scroll using IntersectionObserver)
-- Gradient accents, colored glows, subtle shadows
-- Cards with hover effects (transform, box-shadow transitions)
-- Modern border-radius (16px-24px on cards)
-- CSS custom properties for consistent theming
+━━━ REAL MEDIA (USE THESE — DO NOT INVENT URLs) ━━━
+${heroMediaBlock}
 
-REQUIRED SECTIONS (in order):
-1. NAVIGATION — sticky, glass-morphism (backdrop-filter blur), logo left + links right + CTA button
-2. HERO — Full viewport height. Massive headline (60px+), compelling subheadline, 2 CTA buttons (primary + secondary), animated background gradient or geometric shapes using pure CSS
-3. SOCIAL PROOF BAR — 3-4 key stats (e.g., "500+ Clients", "4.9★ Rating", "10 Years Experience") with large numbers
-4. SERVICES/FEATURES — 6 cards in a grid. Each card: large emoji icon, bold title, 2-line description. Cards must have hover animation.
-5. HOW IT WORKS — 3 steps with numbered circles, icons, and descriptions
-6. TESTIMONIALS — 3 testimonials with realistic full names, job titles, company names, star ratings. Use quote marks. Card design.
-7. CTA SECTION — Bold full-width section with contrasting background, compelling headline, and button
-8. CONTACT — Working contact form (name, email, phone, message, submit button) with styled inputs
-9. FOOTER — Logo, tagline, nav links, contact info, copyright 2025
+━━━ DESIGN IDENTITY ━━━
+${colorScheme ? `Color scheme: ${colorScheme}` : `Analyze the business type and choose an industry-perfect color palette. Examples: restaurant = warm amber/deep red, law = navy/gold, tech = electric blue/dark, spa = blush/sage. Never use boring gray-on-white. Pick a bold, memorable identity.`}
+${font ? `Primary font: Import ${font} from Google Fonts` : `Import 2 Google Fonts — a striking display font for headings, a clean readable font for body. Pick fonts that match the brand personality.`}
+- Rich, dark backgrounds OR bold colorful design — never plain white pages
+- Large powerful typography (hero headline 64px+, section headings 42px+)
+- Generous whitespace (sections minimum 100px top/bottom padding)
+- Smooth CSS animations with IntersectionObserver (fade-in, slide-up on scroll)
+- Gradient accents, colored glows, subtle layered shadows
+- Cards with hover transforms (translateY, box-shadow transitions)
+- Modern border-radius (16px–24px on cards)
+- CSS custom properties (--primary, --secondary, --accent, --bg, --text) for consistent theming
+- clip-path or diagonal section dividers for a premium feel
+- At least one section with a bold full-bleed gradient background
 
-SEO REQUIREMENTS (include ALL):
-- <title>${name} | [Primary Service] | [City if applicable]</title>
-- <meta name="description" content="...155 chars...">
+━━━ REQUIRED SECTIONS (in this order) ━━━
+1. NAVIGATION — sticky, glass-morphism (backdrop-filter:blur(20px)), logo text left + nav links right + CTA button. Collapses to hamburger on mobile.
+2. HERO — Full viewport height (100vh). Massive headline (64px+), compelling subheadline, 2 CTA buttons (primary solid + secondary outline). Use the real media provided above.
+3. SOCIAL PROOF BAR — 3–4 stats with large bold numbers (e.g., "500+ Happy Clients", "10 Years Experience", "4.9★ Rating"). Dark pill/card design.
+4. SERVICES/FEATURES — 6 cards in a CSS grid. Each card: relevant emoji icon, bold title, 2-line description. Strong hover animation (lift + glow).
+5. HOW IT WORKS — 3 numbered steps with large circles, icons, and clear descriptions. Connected with a subtle line/arrow.
+6. ABOUT/STORY — Split layout: compelling paragraph about the business on one side, the real about photo (if provided) on the other.
+7. TESTIMONIALS — 3 testimonials with realistic full names, job titles, companies, 5-star ratings, and quote marks. Card design with subtle background.
+8. CTA SECTION — Bold full-width section, contrasting gradient background, compelling headline, large button.
+9. CONTACT — Styled contact form (name, email, phone, message, submit). Beautiful input styling with focus states.
+10. FOOTER — Logo, tagline, 3-column layout (links, contact info, social icons), copyright ${new Date().getFullYear()}.
+
+━━━ SEO (include ALL) ━━━
+- <title>${name} | [Primary Service] | [Location if mentioned]</title>
+- <meta name="description" content="[155 char description]">
 - <meta property="og:title">, <meta property="og:description">, <meta property="og:type" content="website">
+- <meta property="og:image" content="${heroPhoto || ''}">
 - <meta name="viewport" content="width=device-width, initial-scale=1.0">
-- Semantic HTML5: <header>, <main>, <section>, <footer>, <nav>
-- <script type="application/ld+json"> with complete LocalBusiness schema including name, description, url
+- Semantic HTML5: <header>, <main>, <section id="...">, <footer>, <nav>
+- <script type="application/ld+json"> with full LocalBusiness schema
 
-CONTACT FORM — use EXACTLY this JS:
+━━━ CONTACT FORM (use EXACTLY this JS) ━━━
 <form id="contact-form">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="email" name="email" placeholder="Email Address" required>
@@ -223,21 +368,21 @@ document.getElementById('contact-form').addEventListener('submit',function(e){
 });
 </script>
 
-ANIMATIONS — include ALL of these:
-- IntersectionObserver that adds class "visible" when sections scroll into view
-- CSS: .fade-in { opacity:0; transform:translateY(30px); transition:opacity 0.6s ease, transform 0.6s ease; }
-- CSS: .fade-in.visible { opacity:1; transform:translateY(0); }
-- Staggered delays for grid items (.fade-in:nth-child(2) { transition-delay: 0.1s; } etc.)
-- Smooth scroll behavior
-- Navigation highlight on scroll (add active class to current section link)
+━━━ ANIMATIONS ━━━
+- IntersectionObserver adds class "visible" when elements scroll into view
+- .fade-in { opacity:0; transform:translateY(30px); transition:opacity 0.6s ease, transform 0.6s ease; }
+- .fade-in.visible { opacity:1; transform:translateY(0); }
+- Staggered delays on grid children (.fade-in:nth-child(2){transition-delay:0.1s} etc up to 6)
+- smooth-scroll on <html>
+- Active nav link highlight on scroll
 - Hover effects on ALL buttons and cards
 
-MOBILE RESPONSIVE:
-- Breakpoints at 1024px, 768px, 480px
-- Navigation collapses to hamburger menu on mobile with working toggle
-- Grid columns collapse: 3-col → 2-col → 1-col
+━━━ MOBILE RESPONSIVE ━━━
+- Breakpoints: 1024px, 768px, 480px
+- Hamburger menu on mobile with JS toggle
+- Grids: 3-col → 2-col → 1-col
 - Font sizes scale down proportionally
-- Hero padding reduces on mobile
+- Hero video/image still fills screen on mobile
 
 Return ONLY the complete HTML file. No markdown. No code blocks. No explanations. Start with <!DOCTYPE html>.`;
 }
@@ -256,7 +401,7 @@ Create a clean, modern, memorable SVG logo:
 Return ONLY the complete <svg> element. No markdown, no explanation, nothing else.`;
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
@@ -268,7 +413,7 @@ const server = http.createServer(async (req, res) => {
 
   try {
 
-  // ── GENERATE WEBSITE ────────────────────────────────────
+  // ── GENERATE WEBSITE ────────────────────────────────────────────────────────
   if (p === '/api/generate-website' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {businessName,businessDescription,userId,options} = body;
@@ -292,7 +437,12 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    const html = cleanHTML(await callAnthropic([{role:'user',content:genPrompt(businessName,businessDescription,options)}]));
+    // ── Fetch Pexels media BEFORE calling Claude ──────────────────────────────
+    console.log('Fetching Pexels media for:', businessName);
+    const media = await fetchPexelsMedia(businessName, businessDescription);
+    console.log('Media fetched — heroVideo:', !!media.heroVideo, 'heroPhoto:', !!media.heroPhoto);
+
+    const html = cleanHTML(await callAnthropic([{role:'user',content:genPrompt(businessName,businessDescription,options,media)}]));
 
     let siteId=null, slug=null;
     if (userId) {
@@ -308,7 +458,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{html,siteId,slug});
   }
 
-  // ── EDIT WEBSITE ────────────────────────────────────────
+  // ── EDIT WEBSITE ─────────────────────────────────────────────────────────────
   if (p === '/api/edit-website' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {currentHTML,editInstruction,siteId,userId} = body;
@@ -334,6 +484,7 @@ const server = http.createServer(async (req, res) => {
       'You are an elite web developer editing a stunning website. Current HTML:\n\n'+currentHTML+
       '\n\nChange requested: "'+editInstruction+'"\n\n'+
       'Rules:\n'+
+      '- Keep ALL existing real photo and video URLs — do NOT replace them with placeholders\n'+
       '- Keep ALL existing animations, IntersectionObserver code, and form submission JS\n'+
       '- Keep ALL SEO meta tags and JSON-LD schema\n'+
       '- Keep responsive CSS and mobile hamburger menu\n'+
@@ -349,7 +500,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{html});
   }
 
-  // ── GENERATE LOGO ───────────────────────────────────────
+  // ── GENERATE LOGO ─────────────────────────────────────────────────────────────
   if (p === '/api/generate-logo' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {businessName,businessDescription,userId} = body;
@@ -371,7 +522,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{svg});
   }
 
-  // ── EDIT USAGE ──────────────────────────────────────────
+  // ── EDIT USAGE ────────────────────────────────────────────────────────────────
   if (p === '/api/edit-usage' && req.method === 'GET') {
     const userId = urlObj.searchParams.get('userId');
     if (!userId) return json(res,400,{error:'Missing userId'});
@@ -387,7 +538,7 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  // ── VERSION HISTORY ─────────────────────────────────────
+  // ── VERSION HISTORY ───────────────────────────────────────────────────────────
   if (p === '/api/versions' && req.method === 'GET') {
     const siteId = urlObj.searchParams.get('siteId');
     if (!siteId) return json(res,400,{error:'Missing siteId'});
@@ -395,7 +546,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,r.data||[]);
   }
 
-  // ── RESTORE VERSION ─────────────────────────────────────
+  // ── RESTORE VERSION ───────────────────────────────────────────────────────────
   if (p === '/api/restore-version' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {versionId,siteId,userId} = body;
@@ -408,7 +559,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{html});
   }
 
-  // ── CONTACT FORM ────────────────────────────────────────
+  // ── CONTACT FORM ──────────────────────────────────────────────────────────────
   if (p === '/__forms/submit' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const ref = req.headers.referer||'';
@@ -425,7 +576,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{success:true});
   }
 
-  // ── GET FORM SUBMISSIONS ────────────────────────────────
+  // ── GET FORM SUBMISSIONS ──────────────────────────────────────────────────────
   if (p === '/api/form-submissions' && req.method === 'GET') {
     const userId = urlObj.searchParams.get('userId');
     if (!userId) return json(res,400,{error:'Missing userId'});
@@ -437,7 +588,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,r.data||[]);
   }
 
-  // ── DOMAIN CONFIG ───────────────────────────────────────
+  // ── DOMAIN CONFIG ─────────────────────────────────────────────────────────────
   if (p === '/api/domain-config' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {siteId,userId,customDomain} = body;
@@ -456,7 +607,7 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  // ── AGENCY: SHARE LINK ──────────────────────────────────
+  // ── AGENCY: SHARE LINK ────────────────────────────────────────────────────────
   if (p === '/api/agency/share-link' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {siteId,userId} = body;
@@ -466,7 +617,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{shareUrl:DOMAIN+'/preview/'+token,token});
   }
 
-  // ── AGENCY: TRANSFER ────────────────────────────────────
+  // ── AGENCY: TRANSFER ──────────────────────────────────────────────────────────
   if (p === '/api/agency/transfer' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {siteId,userId,newOwnerEmail} = body;
@@ -478,7 +629,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{success:true,message:'Transfer initiated.'});
   }
 
-  // ── PREVIEW ─────────────────────────────────────────────
+  // ── PREVIEW ───────────────────────────────────────────────────────────────────
   if (p.startsWith('/preview/')) {
     const token = p.replace('/preview/','').split('/')[0];
     const r = await supabaseRequest('GET','sites?share_token=eq.'+token+'&limit=1');
@@ -487,7 +638,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200,{'Content-Type':'text/html'}); res.end(site.html); return;
   }
 
-  // ── DELETE SITE ─────────────────────────────────────────
+  // ── DELETE SITE ───────────────────────────────────────────────────────────────
   if (p === '/api/delete-site' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     if (!body.siteId||!body.userId) return json(res,400,{error:'Missing fields'});
@@ -495,7 +646,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{success:true});
   }
 
-  // ── EXPORT SITE ─────────────────────────────────────────
+  // ── EXPORT SITE ───────────────────────────────────────────────────────────────
   if (p === '/api/export-site' && req.method === 'GET') {
     const siteId = urlObj.searchParams.get('siteId');
     const userId = urlObj.searchParams.get('userId');
@@ -506,7 +657,7 @@ const server = http.createServer(async (req, res) => {
     res.end(r.data[0].html); return;
   }
 
-  // ── CHECKOUT ────────────────────────────────────────────
+  // ── CHECKOUT ──────────────────────────────────────────────────────────────────
   if (p === '/api/create-checkout' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {priceId,userId,userEmail,siteId} = body;
@@ -525,7 +676,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{url:session.data.url});
   }
 
-  // ── STRIPE WEBHOOK ──────────────────────────────────────
+  // ── STRIPE WEBHOOK ────────────────────────────────────────────────────────────
   if (p === '/api/webhook' && req.method === 'POST') {
     const raw = await readBody(req);
     const sig = req.headers['stripe-signature'];
@@ -554,7 +705,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,{received:true});
   }
 
-  // ── MY SITES ────────────────────────────────────────────
+  // ── MY SITES ──────────────────────────────────────────────────────────────────
   if (p === '/api/my-sites' && req.method === 'GET') {
     const userId = urlObj.searchParams.get('userId');
     if (!userId) return json(res,400,{error:'Missing userId'});
@@ -562,7 +713,7 @@ const server = http.createServer(async (req, res) => {
     return json(res,200,r.data||[]);
   }
 
-  // ── SITEMAP ─────────────────────────────────────────────
+  // ── SITEMAP ───────────────────────────────────────────────────────────────────
   if (p.startsWith('/site/')&&p.endsWith('/sitemap.xml')) {
     const slug = p.replace('/site/','').replace('/sitemap.xml','');
     const r = await supabaseRequest('GET','sites?slug=eq.'+slug+'&published=eq.true&limit=1');
@@ -574,7 +725,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // ── ROBOTS.TXT ──────────────────────────────────────────
+  // ── ROBOTS.TXT ────────────────────────────────────────────────────────────────
   if (p.startsWith('/site/')&&p.endsWith('/robots.txt')) {
     const slug = p.replace('/site/','').replace('/robots.txt','');
     res.writeHead(200,{'Content-Type':'text/plain'});
@@ -582,7 +733,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // ── PUBLISHED SITE ──────────────────────────────────────
+  // ── PUBLISHED SITE ────────────────────────────────────────────────────────────
   if (p.startsWith('/site/')) {
     const slug = p.replace('/site/','').split('/')[0];
     const r = await supabaseRequest('GET','sites?slug=eq.'+slug+'&published=eq.true&limit=1');
@@ -595,10 +746,16 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200,{'Content-Type':'text/html'}); res.end(site.html); return;
   }
 
-  // ── HEALTH ──────────────────────────────────────────────
-  if (p === '/health') return json(res,200,{ok:true,v:'2.1.0',stripe:!!process.env.STRIPE_SECRET_KEY,anthropic:!!process.env.ANTHROPIC_API_KEY,supabase:!!process.env.SUPABASE_URL});
+  // ── HEALTH ────────────────────────────────────────────────────────────────────
+  if (p === '/health') return json(res,200,{
+    ok:true, v:'2.2.0',
+    stripe:!!process.env.STRIPE_SECRET_KEY,
+    anthropic:!!process.env.ANTHROPIC_API_KEY,
+    supabase:!!process.env.SUPABASE_URL,
+    pexels:!!process.env.PEXELS_API_KEY
+  });
 
-  // ── STATIC FILES ────────────────────────────────────────
+  // ── STATIC FILES ──────────────────────────────────────────────────────────────
   const routes = {'/':'index.html','/pricing':'pricing.html','/dashboard':'dashboard.html','/success':'success.html'};
   let fp = routes[p] ? path.join(__dirname,routes[p]) : path.join(__dirname,p);
   fs.readFile(fp, (err, data) => {
@@ -620,8 +777,9 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('ClientMint v2.1 on port '+PORT);
+  console.log('ClientMint v2.2 on port '+PORT);
   console.log('Stripe:',process.env.STRIPE_SECRET_KEY?'✅':'❌');
   console.log('Anthropic:',process.env.ANTHROPIC_API_KEY?'✅':'❌');
   console.log('Supabase:',process.env.SUPABASE_URL?'✅':'❌');
+  console.log('Pexels:',process.env.PEXELS_API_KEY?'✅':'❌');
 });
