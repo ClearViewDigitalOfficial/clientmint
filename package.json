@@ -2,7 +2,10 @@
   "name": "clientmint",
   "version": "1.0.0",
   "scripts": {
+    "start": "node server.js",
     "build": "exit 0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "stripe": "^14.0.0"
+  }
 }
