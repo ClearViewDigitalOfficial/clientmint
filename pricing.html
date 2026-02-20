@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — ClientMint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --p:#6366F1;--pl:#818CF8;--pd:#4F46E5;
+      --a:#14B8A6;--w:#F59E0B;--g:#10B981;
+      --t:#F1F5F9;--tm:#94A3B8;
+      --bg:#0A0F1E;--card:rgba(15,23,42,0.75);
+      --b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25);
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden}
+    .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .mesh{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 15% -5%,rgba(99,102,241,.2) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 85% 105%,rgba(20,184,166,.12) 0%,transparent 55%)}
+    .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.035) 1px,transparent 1px);background-size:60px 60px}
+    .noise{position:absolute;inset:0;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+    nav{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.5)}
+    .logo{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;display:flex;align-items:center;gap:.5rem}
+    .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:8px;display:grid;place-items:center;font-size:14px;-webkit-text-fill-color:white;flex-shrink:0}
+    .nav-links{display:flex;align-items:center;gap:1.75rem}
+    .nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--t)}
+    .nav-r{display:flex;align-items:center;gap:.75rem}
+    .nbtn{padding:.45rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;border:1px solid var(--b);background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}
+    .nbtn:hover{border-color:var(--bg2);color:var(--t)}
+    #userEmailNav{font-size:.8rem;color:var(--tm)}
+    .hero{position:relative;z-index:1;text-align:center;padding:5rem 5% 2.5rem}
+    .badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);padding:.35rem .9rem;border-radius:100px;font-size:.75rem;font-weight:700;color:var(--p
