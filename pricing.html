@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -215,38 +216,39 @@
     <button class="cta-btn ghost" onclick="window.location.href='/'">Try for Free</button>
   </div>
 
-  <!-- PRO -->
+  <!-- LAUNCH (starter) -->
   <div class="card hot">
     <div class="pop-tag">⚡ Most Popular</div>
-    <div class="plan-name">Pro</div>
+    <div class="plan-name">Launch</div>
     <div class="price"><span class="price-num" id="proPrice">$9</span><span class="price-per">/mo</span></div>
-    <div class="price-note" id="proNote">Billed monthly · cancel anytime</div>
+    <div class="price-note" id="proNote">Billed monthly · renews automatically until you cancel</div>
     <hr class="div">
     <ul class="feats">
-      <li class="on"><span class="fi y">✓</span>Unlimited website generations</li>
-      <li class="on"><span class="fi y">✓</span>Publish to a live URL instantly</li>
+      <li class="on"><span class="fi y">✓</span>2 websites (draft or published)</li>
+      <li class="on"><span class="fi y">✓</span>1 published live site</li>
       <li class="on"><span class="fi y">✓</span>100 AI edits per month</li>
       <li class="on"><span class="fi y">✓</span>Free subdomain included</li>
       <li class="on"><span class="fi y">✓</span>SSL certificate included</li>
-      <li class="on"><span class="fi y">✓</span>Remove ClientMint badge</li>
-      <li class="off"><span class="fi n">⏳</span>Custom domain (coming soon)</li>
+      <li class="on"><span class="fi y">✓</span>Bring your own domain (CNAME)</li>
+      <li class="on"><span class="fi y">✓</span>Contact form submissions</li>
     </ul>
-    <button class="cta-btn main" onclick="handleCheckout('pro')"><span>Publish My Website →</span></button>
+    <button class="cta-btn main" id="launchBtn" onclick="handleCheckout('starter')"><span>Publish My Website →</span></button>
   </div>
 
   <!-- BUSINESS -->
   <div class="card">
     <div class="plan-name">Business</div>
     <div class="price"><span class="price-num" id="bizPrice">$24</span><span class="price-per">/mo</span></div>
-    <div class="price-note" id="bizNote">Billed monthly · cancel anytime</div>
+    <div class="price-note" id="bizNote">Billed monthly · renews automatically until you cancel</div>
     <hr class="div">
     <ul class="feats">
-      <li class="on"><span class="fi y">✓</span>Everything in Pro</li>
-      <li class="on"><span class="fi y">✓</span>Up to 5 published websites</li>
-      <li class="on"><span class="fi y">✓</span>500 AI edits per month</li>
+      <li class="on"><span class="fi y">✓</span>6 websites (draft or published)</li>
+      <li class="on"><span class="fi y">✓</span>Up to 3 published live sites</li>
+      <li class="on"><span class="fi y">✓</span>300 AI edits per month</li>
+      <li class="on"><span class="fi y">✓</span>Everything in Launch</li>
+      <li class="on"><span class="fi y">✓</span>AI logo generation</li>
       <li class="on"><span class="fi y">✓</span>Priority AI generation</li>
       <li class="on"><span class="fi y">✓</span>Form submission dashboard</li>
-      <li class="off"><span class="fi n">⏳</span>Custom domain (coming soon)</li>
     </ul>
     <button class="cta-btn main" onclick="handleCheckout('business')"><span>Get Business →</span></button>
   </div>
@@ -257,14 +259,14 @@
     <div>
       <div class="ag-tag">🏢 For Agencies</div>
       <h2>Build sites for clients.<br>Keep all the profit.</h2>
-      <p>Resell AI-built websites to your clients. White-labeled previews, unlimited generation, and a simple per-publish model that scales with your business.</p>
+      <p>Build and manage many client websites in one place. More AI edits, more published sites, and priority support so you can move fast.</p>
       <div class="ag-perks">
-        <div class="ag-perk"><span class="check">✦</span>Unlimited generations</div>
-        <div class="ag-perk"><span class="check">✦</span>750 AI edits / month</div>
-        <div class="ag-perk"><span class="check">✦</span>White-labeled previews</div>
-        <div class="ag-perk"><span class="check">✦</span>No ClientMint branding</div>
-        <div class="ag-perk"><span class="check">✦</span>Client share links</div>
+        <div class="ag-perk"><span class="check">✦</span>Unlimited websites &amp; publishing</div>
+        <div class="ag-perk"><span class="check">✦</span>1,000 AI edits / month</div>
+        <div class="ag-perk"><span class="check">✦</span>Client share links &amp; previews</div>
+        <div class="ag-perk"><span class="check">✦</span>Everything in Business</div>
         <div class="ag-perk"><span class="check">✦</span>Priority support</div>
+        <div class="ag-perk"><span class="check">✦</span>Billed monthly · cancel anytime</div>
       </div>
     </div>
     <div class="ag-price-col">
@@ -276,16 +278,13 @@
 </div>
 
 <div class="domain-wrap fade4">
-  <div class="domain" style="opacity:0.75">
+  <div class="domain">
     <div class="domain-l">
       <div class="domain-icon">🌐</div>
       <div class="domain-text">
-        <h3>Custom Domain Connection — <span style="color:var(--a)">Coming Soon</span></h3>
-        <p>Connect your own .com, .io, or .co domain to your ClientMint site. Available on Pro &amp; Business plans. Join the waitlist and we'll notify you when it launches.</p>
+        <h3>Bring Your Own Domain</h3>
+        <p>On Launch, Business, and Agency plans you can connect a domain you already own (e.g. yourbusiness.com) using a CNAME record. SSL is included free. We do not sell or provision domains — you buy your domain elsewhere and point it here.</p>
       </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem">
-      <span style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);color:var(--a);padding:.6rem 1.2rem;border-radius:10px;font-family:Inter,sans-serif;font-size:.85rem;font-weight:700;white-space:nowrap">Notify Me →</span>
     </div>
   </div>
 </div>
@@ -352,9 +351,15 @@
   let pendingPlan  = null; // plan user tried to checkout before login
   let gateIsSignUp = true;
 
+  // ── STRIPE PRICE IDs ─────────────────────────────────────────────────────────
+  // These are mapped on the SERVER in lib/plans.js → STRIPE_PRICES.
+  // The frontend only passes the plan KEY ('starter', 'business', 'agency').
+  // The server resolves it to a Stripe price ID.
+  // NOTE: Annual billing toggle left in UI for future use but currently uses monthly prices.
   const PRICES = {
-    pro:      { monthly: { id: 'price_1T2e81PRykaJHA8mMkFNEzmo', amount: 9  }, annual: { id: 'price_1T2eCEPRykaJHA8mZRoTES47', amount: 6  } },
-    business: { monthly: { id: 'price_1T2eI1PRykaJHA8mNPXl7rFp', amount: 24 }, annual: { id: 'price_1T2eLvPRykaJHA8mrudxCESj', amount: 17 } }
+    starter:  { monthly: { id: 'starter',  amount: 9  }, annual: { id: 'starter',  amount: 9  } },
+    business: { monthly: { id: 'business', amount: 24 }, annual: { id: 'business', amount: 24 } },
+    agency:   { monthly: { id: 'agency',   amount: 49 }, annual: { id: 'agency',   amount: 49 } }
   };
 
   // Init
@@ -401,15 +406,11 @@
     billing = b;
     document.getElementById('btnMonthly').classList.toggle('on', b === 'monthly');
     document.getElementById('btnAnnual').classList.toggle('on',  b === 'annual');
-    document.getElementById('proPrice').textContent = '$' + PRICES.pro[b].amount;
+    // Annual pricing uses same price as monthly for now (annual option reserved for future)
+    document.getElementById('proPrice').textContent = '$' + PRICES.starter[b].amount;
     document.getElementById('bizPrice').textContent = '$' + PRICES.business[b].amount;
-    if (b === 'annual') {
-      document.getElementById('proNote').innerHTML = '<span class="orig-price">$9</span> Billed annually · save 30%';
-      document.getElementById('bizNote').innerHTML = '<span class="orig-price">$24</span> Billed annually · save 30%';
-    } else {
-      document.getElementById('proNote').textContent = 'Billed monthly · cancel anytime';
-      document.getElementById('bizNote').textContent = 'Billed monthly · cancel anytime';
-    }
+    document.getElementById('proNote').textContent = 'Billed monthly · renews automatically until you cancel';
+    document.getElementById('bizNote').textContent = 'Billed monthly · renews automatically until you cancel';
   }
 
   // Main checkout handler
@@ -424,7 +425,7 @@
   }
 
   async function proceedToCheckout(plan) {
-    const priceId = PRICES[plan][billing].id;
+    const planKey = PRICES[plan] ? plan : 'starter'; // safe fallback
     const siteId  = sessionStorage.getItem('pendingSiteId') || '';
     document.getElementById('loadingOverlay').classList.add('show');
     try {
@@ -432,7 +433,7 @@
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({
-          priceId,
+          plan: planKey,
           userId:    currentUser.id,
           userEmail: currentUser.email,
           siteId
