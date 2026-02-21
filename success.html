@@ -71,25 +71,39 @@
   const siteId = params.get('site_id');
 
   window.addEventListener('load', async () => {
-    // Small delay to let Stripe webhook process
-    await new Promise(r => setTimeout(r, 2000));
-
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
 
-    // Determine plan name from URL or default to Pro
+    // Poll for plan activation (Stripe webhook can take a few seconds)
     let planName = 'Pro';
-    if (siteId) {
+    let attempts = 0;
+    async function checkPlan() {
+      attempts++;
       try {
-        const res = await fetch('/api/my-sites?userId=' + (user?.id || ''));
-        const sites = await res.json();
-        const site = Array.isArray(sites) ? sites.find(s => s.id === siteId) : null;
-        if (site?.plan) planName = site.plan.charAt(0).toUpperCase() + site.plan.slice(1);
+        if (user) {
+          const res = await fetch('/api/my-sites?userId=' + user.id);
+          const sites = await res.json();
+          // Find any paid site
+          const paidSite = Array.isArray(sites) ? sites.find(s => s.plan && s.plan !== 'free') : null;
+          if (paidSite) {
+            planName = paidSite.plan.charAt(0).toUpperCase() + paidSite.plan.slice(1);
+            renderSuccess(planName, paidSite.id, user);
+            launchConfetti();
+            sessionStorage.removeItem('pendingSiteId');
+            return;
+          }
+        }
       } catch(e) {}
+      // Retry up to 6 times (12 seconds total)
+      if (attempts < 6) {
+        setTimeout(checkPlan, 2000);
+      } else {
+        // Give up waiting, show success anyway
+        renderSuccess(planName, siteId, user);
+        launchConfetti();
+      }
     }
-
-    renderSuccess(planName, siteId, user);
-    launchConfetti();
+    checkPlan();
   });
 
   function renderSuccess(plan, siteId, user) {
