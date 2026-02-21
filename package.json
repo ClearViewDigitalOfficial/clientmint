@@ -1,9 +1,11 @@
 {
   "name": "clientmint",
-  "version": "1.0.0",
+  "version": "2.4.0",
   "scripts": {
     "start": "node server.js",
-    "build": "exit 0"
+    "build": "exit 0",
+    "test": "node tests/webhook.test.js",
+    "test:manual": "node tests/manual-test-checklist.js"
   },
   "dependencies": {
     "stripe": "^14.0.0"
