@@ -16,7 +16,7 @@
     nav{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.5)}
     .logo{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.5rem;letter-spacing:-.5px}
     .logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:7px;display:grid;place-items:center;font-size:13px;color:white;flex-shrink:0}
-    .logo span{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo-text{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav-links{display:flex;gap:1.5rem}.nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--t)}
     .nav-r{display:flex;align-items:center;gap:.75rem}
     .nbtn{padding:.4rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid var(--b);background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}.nbtn:hover{border-color:var(--bg2);color:var(--t)}
@@ -104,7 +104,7 @@
 <div class="bg"><div class="mesh"></div><div class="grid"></div></div>
 <div class="toast" id="toast"></div>
 <nav>
-  <a href="/" class="logo"><div class="logo-mark">⚡</div>Client<span>Mint</span></a>
+  <a href="/" class="logo"><div class="logo-mark">⚡</div><span class="logo-text">ClientMint</span></a>
   <div class="nav-links"><a href="/">Home</a><a href="/pricing">Pricing</a><a href="/dashboard" class="active">Dashboard</a></div>
   <div class="nav-r"><span id="navEmail"></span><button class="nbtn" onclick="signOut()">Sign Out</button></div>
 </nav>
@@ -131,13 +131,19 @@
   });
 
   window.addEventListener('load', async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session && session.user && !currentUser) {
-      currentUser = session.user;
-      document.getElementById('navEmail').textContent = session.user.email;
-      await loadDashboard();
-    } else if (!session) {
-      setTimeout(() => { if (!currentUser) showAuthGate(); }, 2000);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user && !currentUser) {
+        currentUser = session.user;
+        document.getElementById('navEmail').textContent = session.user.email;
+        await loadDashboard();
+      } else if (!session) {
+        // Give onAuthStateChange a moment then show gate
+        setTimeout(() => { if (!currentUser) showAuthGate(); }, 1500);
+      }
+    } catch(e) {
+      console.error('Auth check failed:', e);
+      setTimeout(() => { if (!currentUser) showAuthGate(); }, 1000);
     }
   });
 
@@ -153,11 +159,15 @@
         fetch('/api/my-sites?userId=' + currentUser.id),
         fetch('/api/edit-usage?userId=' + currentUser.id)
       ]);
+      if (!sitesRes.ok) throw new Error('Failed to load sites ('+sitesRes.status+')');
+      if (!usageRes.ok) throw new Error('Failed to load usage ('+usageRes.status+')');
       allSites = await sitesRes.json() || [];
       const usage = await usageRes.json();
-      renderDashboard(allSites, usage);
+      renderDashboard(Array.isArray(allSites) ? allSites : [], usage);
     } catch(e) {
+      console.error('Dashboard load error:', e);
       renderDashboard([], { plan: 'free', editCount: 0, editLimit: 3, remaining: 3 });
+      toast('Dashboard loaded with limited data: ' + e.message, 'warn');
     }
   }
 
@@ -261,13 +271,13 @@
       <div class="billing-card" style="background:rgba(15,23,42,.4)">
         <h3>Need help with billing?</h3>
         <p style="color:var(--tm);font-size:.875rem;margin-bottom:1rem">To update your payment method, download invoices, or manage your subscription, contact us and we'll handle it immediately.</p>
-        <a href="mailto:hello@clientmint.com?subject=Billing Help" style="color:var(--pl);font-size:.875rem;font-weight:600">📧 hello@clientmint.com</a>
+        <a href="mailto:hello@clientmint.co?subject=Billing Help" style="color:var(--pl);font-size:.875rem;font-weight:600">📧 hello@clientmint.co</a>
       </div>`;
   }
 
   function cancelPlan() {
-    if (confirm('Are you sure you want to cancel? Your site will go offline at the end of your billing period.\n\nEmail hello@clientmint.com to cancel or manage your subscription.')) {
-      window.location.href = 'mailto:hello@clientmint.com?subject=Cancel Subscription&body=Please cancel my ClientMint subscription for ' + (currentUser?.email || '');
+    if (confirm('Are you sure you want to cancel? Your site will go offline at the end of your billing period.\n\nEmail hello@clientmint.co to cancel or manage your subscription.')) {
+      window.location.href = 'mailto:hello@clientmint.co?subject=Cancel Subscription&body=Please cancel my ClientMint subscription for ' + (currentUser?.email || '');
     }
   }
 
