@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pricing — ClientMint</title>
+  <title>Pricing — ClientMint AI Website Builder</title>
+  <meta name="description" content="Simple, transparent pricing. Generate your website free, pay only when you publish. Pro from $9/mo.">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    :root{--p:#6366F1;--pl:#818CF8;--pd:#4F46E5;--a:#14B8A6;--w:#F59E0B;--g:#10B981;--t:#F1F5F9;--tm:#94A3B8;--bg:#0A0F1E;--card:rgba(15,23,42,0.75);--b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25)}
+    :root{--p:#6366F1;--pl:#818CF8;--pd:#4F46E5;--a:#14B8A6;--w:#F59E0B;--g:#10B981;--t:#F1F5F9;--tm:#94A3B8;--bg:#0A0F1E;--card:rgba(15,23,42,0.78);--b:rgba(148,163,184,0.08);--bg2:rgba(99,102,241,0.25)}
     html{scroll-behavior:smooth}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;overflow-x:hidden}
     .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
     .mesh{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 15% -5%,rgba(99,102,241,.2) 0%,transparent 55%),radial-gradient(ellipse 60% 50% at 85% 105%,rgba(20,184,166,.12) 0%,transparent 55%)}
     .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.035) 1px,transparent 1px);background-size:60px 60px}
-    nav{position:relative;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.5)}
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.55)}
     .logo{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.5rem;letter-spacing:-.5px}
     .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:8px;display:grid;place-items:center;font-size:14px;color:white;flex-shrink:0}
     .logo span{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -22,21 +24,24 @@
     .nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
     .nav-links a:hover,.nav-links a.active{color:var(--t)}
     .nav-r{display:flex;align-items:center;gap:.75rem}
-    .nbtn{padding:.45rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;border:1px solid var(--b);background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}
+    .nbtn{padding:.42rem 1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;border:1px solid var(--b);background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}
     .nbtn:hover{border-color:var(--bg2);color:var(--t)}
-    #userEmailNav{font-size:.8rem;color:var(--tm)}
+    #userEmailNav{font-size:.78rem;color:var(--tm)}
+    /* HERO */
     .hero{position:relative;z-index:1;text-align:center;padding:5rem 5% 2.5rem}
-    .badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);padding:.35rem .9rem;border-radius:100px;font-size:.75rem;font-weight:700;color:var(--pl);margin-bottom:1.75rem;letter-spacing:.3px}
+    .badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.22);padding:.35rem .9rem;border-radius:100px;font-size:.73rem;font-weight:700;color:var(--pl);margin-bottom:1.75rem;letter-spacing:.3px}
     .badge .dot{width:6px;height:6px;background:var(--a);border-radius:50%;animation:blink 2s ease infinite}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-    h1{font-family:'Inter',sans-serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-3px;margin-bottom:1.25rem}
+    h1{font-family:'Inter',sans-serif;font-size:clamp(2.8rem,6vw,4.75rem);font-weight:900;line-height:1.05;letter-spacing:-3px;margin-bottom:1.25rem}
     .grad{background:linear-gradient(135deg,var(--pl) 0%,var(--a) 50%,#F472B6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .hero p{font-size:1.1rem;color:var(--tm);max-width:480px;margin:0 auto 2.5rem;line-height:1.7}
+    .hero p{font-size:1.05rem;color:var(--tm);max-width:480px;margin:0 auto 2.5rem;line-height:1.7}
+    /* TOGGLE */
     .toggle-wrap{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:3.5rem}
     .toggle{display:inline-flex;background:rgba(15,23,42,.9);border:1px solid var(--b);border-radius:100px;padding:4px;gap:3px}
     .tbtn{padding:.45rem 1.4rem;border:none;border-radius:100px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .25s;background:transparent;color:var(--tm);font-family:'DM Sans',sans-serif}
     .tbtn.on{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.4)}
-    .save-pill{background:linear-gradient(135deg,var(--g),#059669);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:100px}
+    .save-pill{background:linear-gradient(135deg,var(--g),#059669);color:#fff;font-size:.68rem;font-weight:700;padding:.2rem .6rem;border-radius:100px;vertical-align:middle;margin-left:.25rem}
+    /* CARDS */
     .cards{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1060px;margin:0 auto;padding:0 5% 3rem}
     .card{position:relative;background:var(--card);border:1px solid var(--b);border-radius:22px;padding:2.25rem 1.875rem;backdrop-filter:blur(20px);transition:transform .3s,box-shadow .3s,border-color .3s}
     .card:hover{transform:translateY(-5px);border-color:var(--bg2);box-shadow:0 25px 60px rgba(0,0,0,.35)}
@@ -44,18 +49,18 @@
     .card.hot:hover{transform:scale(1.03) translateY(-5px)}
     .card.hot::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--pl),var(--a),transparent)}
     .pop-tag{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--p),var(--a));color:#fff;font-size:.68rem;font-weight:700;padding:.3rem 1.1rem;border-radius:0 0 10px 10px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
-    .plan-name{font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tm);margin-bottom:.6rem}
+    .plan-name{font-family:'Inter',sans-serif;font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tm);margin-bottom:.6rem}
     .card.hot .plan-name{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .price{display:flex;align-items:baseline;gap:.2rem;margin-bottom:.4rem}
     .price-num{font-family:'Inter',sans-serif;font-size:3.25rem;font-weight:900;color:var(--t);line-height:1;transition:all .3s;letter-spacing:-2px}
     .price-per{font-size:.875rem;color:var(--tm)}
-    .price-note{font-size:.82rem;color:var(--tm);margin-bottom:1.75rem;min-height:1.1em}
-    .orig-price{text-decoration:line-through;margin-right:.35rem;opacity:.5}
+    .price-note{font-size:.82rem;color:var(--tm);margin-bottom:1.75rem;min-height:1.2em}
+    .orig-price{text-decoration:line-through;margin-right:.25rem;opacity:.45}
     hr.div{border:none;border-top:1px solid var(--b);margin-bottom:1.5rem}
     ul.feats{list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.875rem}
-    ul.feats li{display:flex;align-items:flex-start;gap:.65rem;font-size:.875rem;color:var(--tm);line-height:1.4}
+    ul.feats li{display:flex;align-items:flex-start;gap:.65rem;font-size:.875rem;line-height:1.4}
     ul.feats li.on{color:var(--t)}
-    ul.feats li.off{opacity:.38}
+    ul.feats li.off{opacity:.35;color:var(--tm)}
     .fi{width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:.6rem;flex-shrink:0;margin-top:1px}
     .fi.y{background:rgba(16,185,129,.14);color:var(--g)}
     .fi.n{background:rgba(148,163,184,.07);color:var(--tm)}
@@ -64,8 +69,10 @@
     .cta-btn.ghost{background:rgba(148,163,184,.06);border:1px solid var(--b);color:var(--tm)}
     .cta-btn.ghost:hover{background:rgba(148,163,184,.1);border-color:var(--bg2);color:var(--t)}
     .cta-btn.main{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;position:relative;overflow:hidden}
-    .cta-btn.main span{position:relative;z-index:1}
+    .cta-btn.main::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .2s}
     .cta-btn.main:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(99,102,241,.45)}
+    .cta-btn.main:hover::after{opacity:1}
+    /* AGENCY */
     .agency-wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto 3rem;padding:0 5%}
     .agency{position:relative;border-radius:24px;padding:2.75rem;overflow:hidden;background:linear-gradient(135deg,rgba(20,15,55,.92) 0%,rgba(10,15,30,.96) 100%);border:1px solid rgba(245,158,11,.2);display:grid;grid-template-columns:1fr auto;gap:2.5rem;align-items:center}
     .agency::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.55),transparent)}
@@ -80,31 +87,56 @@
     .ag-price-sub{font-size:.82rem;color:var(--tm);margin-bottom:1.25rem}
     .ag-btn{width:100%;padding:.9rem 1.5rem;background:linear-gradient(135deg,var(--w),#D97706);color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .25s;white-space:nowrap}
     .ag-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(245,158,11,.35)}
+    /* DOMAIN PROMO */
     .domain-wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto 4.5rem;padding:0 5%}
     .domain{background:linear-gradient(135deg,rgba(20,184,166,.07) 0%,rgba(99,102,241,.05) 100%);border:1px solid rgba(20,184,166,.18);border-radius:18px;padding:1.875rem 2.25rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
     .domain-l{display:flex;align-items:center;gap:1.25rem}
     .domain-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--a),var(--p));border-radius:12px;display:grid;place-items:center;font-size:1.4rem;flex-shrink:0}
-    .domain-text h3{font-family:'Inter',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:.2rem}
+    .domain-text h3{font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.2rem}
     .domain-text p{font-size:.84rem;color:var(--tm)}
-    .domain-price{font-family:'Inter',sans-serif;font-size:2.25rem;font-weight:900;color:var(--a);letter-spacing:-1px}
-    .domain-price s{font-size:.95rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--tm);margin-left:.25rem}
-    .faq-wrap{position:relative;z-index:1;max-width:660px;margin:0 auto 5rem;padding:0 5%}
-    .faq-title{font-family:'Inter',sans-serif;font-size:1.875rem;font-weight:800;text-align:center;margin-bottom:2.25rem;letter-spacing:-1px}
+    .domain-price{font-family:'Inter',sans-serif;font-size:2.25rem;font-weight:900;color:var(--a);letter-spacing:-1px;white-space:nowrap}
+    .domain-price s{font-size:.9rem;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--tm);margin-left:.25rem}
+    /* FAQ */
+    .faq-wrap{position:relative;z-index:1;max-width:680px;margin:0 auto 5rem;padding:0 5%}
+    .faq-title{font-family:'Inter',sans-serif;font-size:1.875rem;font-weight:800;text-align:center;margin-bottom:.5rem;letter-spacing:-1px}
+    .faq-sub{text-align:center;color:var(--tm);font-size:.9rem;margin-bottom:2.25rem}
     .faq-item{border-bottom:1px solid var(--b)}
-    .faq-q{width:100%;background:none;border:none;color:var(--t);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;text-align:left;padding:1.15rem 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:color .2s}
+    .faq-q{width:100%;background:none;border:none;color:var(--t);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;text-align:left;padding:1.2rem 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:color .2s}
     .faq-q:hover{color:var(--pl)}
-    .faq-icon{width:22px;height:22px;border-radius:50%;background:rgba(148,163,184,.08);display:grid;place-items:center;flex-shrink:0;transition:all .3s;font-size:.9rem;color:var(--tm);font-weight:400;line-height:1}
-    .faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(0,1,0,1);font-size:.9rem;color:var(--tm);line-height:1.7}
+    .faq-icon{width:24px;height:24px;border-radius:50%;background:rgba(148,163,184,.08);display:grid;place-items:center;flex-shrink:0;transition:all .3s;font-size:.85rem;color:var(--tm);line-height:1}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(0,1,0,1)}
     .faq-item.open .faq-a{max-height:500px;transition:max-height .4s ease-in}
-    .faq-a p{padding-bottom:1.25rem}
+    .faq-a-inner{font-size:.9rem;color:var(--tm);line-height:1.75;padding-bottom:1.25rem}
     .faq-item.open .faq-icon{background:rgba(99,102,241,.15);color:var(--pl);transform:rotate(45deg)}
-    .toast{position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid var(--g);border-radius:12px;padding:1rem 1.5rem;color:var(--t);font-size:.9rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all .4s ease;max-width:300px}
-    .toast.show{transform:translateY(0);opacity:1}
-    .loading-overlay{position:fixed;inset:0;background:rgba(10,15,30,.8);backdrop-filter:blur(10px);z-index:9000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+    /* MODALS & OVERLAYS */
+    .loading-overlay{position:fixed;inset:0;background:rgba(10,15,30,.85);backdrop-filter:blur(12px);z-index:9000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
     .loading-overlay.show{display:flex}
     .spinner{width:44px;height:44px;border:3px solid var(--b);border-top-color:var(--p);border-radius:50%;animation:spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .loading-overlay p{color:var(--tm);font-size:.95rem}
+    /* AUTH GATE MODAL */
+    .auth-gate-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9500;backdrop-filter:blur(6px)}
+    .auth-gate-overlay.show{display:flex}
+    .auth-gate-modal{background:rgba(15,23,42,.98);border:1px solid rgba(99,102,241,.25);border-radius:22px;padding:2.5rem;max-width:420px;width:92%;box-shadow:0 40px 100px rgba(0,0,0,.6);text-align:center}
+    .auth-gate-modal h2{font-family:'Inter',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:.5rem;letter-spacing:-.5px}
+    .auth-gate-modal p{color:var(--tm);font-size:.875rem;margin-bottom:1.5rem;line-height:1.6}
+    .auth-form input{width:100%;padding:.8rem 1rem;background:rgba(10,15,30,.9);border:1px solid var(--b);border-radius:10px;color:var(--t);font-size:.88rem;margin-bottom:.65rem;font-family:'DM Sans',sans-serif;transition:border-color .2s;display:block}
+    .auth-form input:focus{outline:none;border-color:var(--pl)}
+    .auth-form .btn-submit{width:100%;padding:.85rem;background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:.75rem;transition:all .2s}
+    .auth-form .btn-submit:hover{box-shadow:0 8px 25px rgba(99,102,241,.4)}
+    .btn-google-auth{width:100%;padding:.72rem;background:#fff;color:#333;border:1px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.75rem;transition:background .2s}
+    .btn-google-auth:hover{background:#f5f5f5}
+    .auth-divider{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;color:var(--tm);font-size:.75rem}
+    .auth-divider hr{flex:1;border:none;border-top:1px solid var(--b)}
+    .auth-switch-link{text-align:center;font-size:.82rem;color:var(--tm);margin-top:.5rem}
+    .auth-switch-link a{color:var(--pl);cursor:pointer;font-weight:600}
+    .auth-err{border-radius:8px;padding:.6rem .85rem;font-size:.8rem;margin-bottom:.75rem;display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#FCA5A5;text-align:left}
+    .auth-err.show{display:block}
+    .auth-succ{border-radius:8px;padding:.6rem .85rem;font-size:.8rem;margin-bottom:.75rem;display:none;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#6EE7B7;text-align:left}
+    .auth-succ.show{display:block}
+    /* TOAST */
+    .toast{position:fixed;bottom:2rem;right:2rem;background:#1E293B;border:1px solid var(--g);border-radius:12px;padding:.85rem 1.5rem;color:var(--t);font-size:.88rem;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all .4s ease;max-width:300px}
+    .toast.show{transform:translateY(0);opacity:1}
     @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
     .fade1{animation:fadeUp .6s ease both}
     .fade2{animation:fadeUp .6s ease .1s both}
@@ -117,6 +149,28 @@
 <div class="bg"><div class="mesh"></div><div class="grid"></div></div>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><p>Redirecting to checkout…</p></div>
 <div class="toast" id="toast"></div>
+
+<!-- AUTH GATE MODAL (shown when not logged in) -->
+<div class="auth-gate-overlay" id="authGateOverlay">
+  <div class="auth-gate-modal">
+    <h2 id="gateTitle">Sign in to Continue</h2>
+    <p id="gateSubtitle">Create a free account or sign in to complete your purchase.</p>
+    <div class="auth-err" id="gateErr"></div>
+    <div class="auth-succ" id="gateSucc"></div>
+    <button class="btn-google-auth" onclick="gateGoogleSignIn()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.48A4.8 4.8 0 0 1 4.5 7.5V5.43H1.83a8 8 0 0 0 0 7.14z"/><path fill="#EA4335" d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8 8 0 0 0 1.83 5.43L4.5 7.5c.67-2 2.52-3.92 4.48-3.92z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-divider"><hr><span>or email</span><hr></div>
+    <div class="auth-form">
+      <input type="email" id="gateEmail" placeholder="Email address">
+      <input type="password" id="gatePassword" placeholder="Password (min 6 chars)">
+      <button class="btn-submit" id="gateSubmitBtn" onclick="gateSubmit()">Create Account & Continue</button>
+    </div>
+    <div class="auth-switch-link" id="gateSwitchLink">Already have an account? <a onclick="gateToggleMode()">Sign in</a></div>
+    <button onclick="document.getElementById('authGateOverlay').classList.remove('show')" style="margin-top:1rem;background:none;border:none;color:var(--tm);font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif">← Back to pricing</button>
+  </div>
+</div>
 
 <nav>
   <a href="/" class="logo"><div class="logo-mark">⚡</div>Client<span>Mint</span></a>
@@ -134,7 +188,7 @@
 <section class="hero fade1">
   <div class="badge"><span class="dot"></span> Simple, transparent pricing</div>
   <h1>Try it free.<br><span class="grad">Pay when you publish.</span></h1>
-  <p>Generate 1 website free with 3 AI edits to see the quality. Only pay when you're ready to go live.</p>
+  <p>Generate 1 website free with 3 AI edits. Only pay when you're ready to go live. No credit card needed to start.</p>
   <div class="toggle-wrap fade2">
     <div class="toggle">
       <button class="tbtn on" id="btnMonthly" onclick="setBilling('monthly')">Monthly</button>
@@ -161,7 +215,7 @@
     <button class="cta-btn ghost" onclick="window.location.href='/'">Try for Free</button>
   </div>
 
-  <!-- PRO (most popular) -->
+  <!-- PRO -->
   <div class="card hot">
     <div class="pop-tag">⚡ Most Popular</div>
     <div class="plan-name">Pro</div>
@@ -202,7 +256,7 @@
     <div>
       <div class="ag-tag">🏢 For Agencies</div>
       <h2>Build sites for clients.<br>Keep all the profit.</h2>
-      <p>Resell AI-built websites to your clients. White-labeled previews, unlimited generation, and a simple per-publish model.</p>
+      <p>Resell AI-built websites to your clients. White-labeled previews, unlimited generation, and a simple per-publish model that scales with your business.</p>
       <div class="ag-perks">
         <div class="ag-perk"><span class="check">✦</span>Unlimited generations</div>
         <div class="ag-perk"><span class="check">✦</span>750 AI edits / month</div>
@@ -234,75 +288,104 @@
 </div>
 
 <div class="faq-wrap">
-  <div class="faq-title">Common questions</div>
+  <div class="faq-title">Common Questions</div>
+  <p class="faq-sub">Everything you need to know about getting started.</p>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">What do I get for free?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>You get 1 AI-generated website and 3 free AI edits — enough to see exactly what you'll be getting before spending a cent. No credit card needed. When you're ready to publish it live and share it with the world, that's when you upgrade.</p></div>
+    <div class="faq-a"><div class="faq-a-inner">You get 1 AI-generated website and 3 free AI edits — enough to see exactly what you'll be getting before spending a cent. No credit card needed. When you're ready to publish it live and share it with the world, that's when you upgrade.</div></div>
   </div>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">What does "published" mean?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Publishing makes your site live on the internet with a real URL like clientmint.onrender.com/site/your-business that anyone can visit 24/7. Without publishing, you can preview and edit your site but only you can see it.</p></div>
+    <div class="faq-a"><div class="faq-a-inner">Publishing makes your site live on the internet with a real URL that anyone can visit 24/7. Without publishing, you can preview and edit your site but only you can see it. Once published, you get a free subdomain like yourbusiness.clientmint.co, or connect your own domain.</div></div>
   </div>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Absolutely. Cancel anytime with one click from your dashboard. Your site stays live until the end of your billing period — no surprise charges, no cancellation fees, no questions asked.</p></div>
+    <div class="faq-a"><div class="faq-a-inner">Absolutely. Cancel anytime with one click from your dashboard. Your site stays live until the end of your billing period — no surprise charges, no cancellation fees, no questions asked. We make it easy to leave (but we don't think you'll want to).</div></div>
   </div>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">What are AI edits?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>AI edits let you change anything on your site by typing in plain English. "Make the colors blue", "Add a testimonials section", "Change the font to something modern" — the AI rewrites your site instantly. Pro gets 100/month, Business gets 500/month.</p></div>
+    <div class="faq-a"><div class="faq-a-inner">AI edits let you change anything on your site by typing in plain English. "Make the colors blue," "Add a testimonials section," "Change the font to something more modern" — the AI rewrites your site instantly. Pro gets 100 edits/month, Business gets 500 edits/month.</div></div>
   </div>
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">Do I need to know how to code?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Not at all. Describe your business, watch the AI build a stunning website, make changes in plain English, then hit publish. Zero coding, zero design skills, zero technical knowledge required.</p></div>
+    <div class="faq-a"><div class="faq-a-inner">Not at all. Describe your business in plain English, watch the AI build a stunning website, make changes by chatting, then hit publish. Zero coding, zero design skills, zero technical knowledge required. If you can type, you can have a professional website.</div></div>
   </div>
 
   <div class="faq-item">
-    <button class="faq-q" onclick="toggleFaq(this)">How does the AI make the websites look good?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><p>Our AI doesn't use templates. It generates a completely custom website from scratch for your specific business — custom colors, layout, copy, animations, and sections that fit your industry. Every site is unique.</p></div>
+    <button class="faq-q" onclick="toggleFaq(this)">How does the AI make the websites look so good?<span class="faq-icon">+</span></button>
+    <div class="faq-a"><div class="faq-a-inner">Our AI doesn't use templates. It generates a completely custom website from scratch specifically for your business — custom colors, layout, typography, copywriting, animations, and sections that fit your exact industry. Every site is unique. No two ClientMint sites look the same.</div></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">What if I already have a domain name?<span class="faq-icon">+</span></button>
+    <div class="faq-a"><div class="faq-a-inner">You can easily connect your existing domain to your ClientMint website on the Business plan. We support all major domain registrars. If you don't have a domain yet, you can purchase one through us for just $1 with any paid plan.</div></div>
   </div>
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://lgphbhtizcbmnsaecoje.supabase.co';
+  const SUPABASE_URL      = 'https://lgphbhtizcbmnsaecoje.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxncGhiaHRpemNibW5zYWVjb2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MTUyOTQsImV4cCI6MjA4NzA5MTI5NH0.8PemFAh7VHxHY4yWVXWqnrYtlHqxPq1kUj2cs0VgAKE';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  let currentUser = null;
-  let billing = 'monthly';
+
+  let currentUser  = null;
+  let billing      = 'monthly';
+  let pendingPlan  = null; // plan user tried to checkout before login
+  let gateIsSignUp = true;
+
   const PRICES = {
-    pro:      { monthly: { id: 'price_1T2e81PRykaJHA8mMkFNEzmo', amount: 9 },  annual: { id: 'price_1T2eCEPRykaJHA8mZRoTES47', amount: 6 } },
+    pro:      { monthly: { id: 'price_1T2e81PRykaJHA8mMkFNEzmo', amount: 9  }, annual: { id: 'price_1T2eCEPRykaJHA8mZRoTES47', amount: 6  } },
     business: { monthly: { id: 'price_1T2eI1PRykaJHA8mNPXl7rFp', amount: 24 }, annual: { id: 'price_1T2eLvPRykaJHA8mrudxCESj', amount: 17 } }
   };
+
+  // Init
   window.addEventListener('load', async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       currentUser = session.user;
-      document.getElementById('userEmailNav').textContent = session.user.email;
-      document.getElementById('authNavBtn').textContent = 'Sign Out';
+      showLoggedIn(session.user.email);
     }
-    // Check if came from editor with a pending site
     const pendingSiteId = sessionStorage.getItem('pendingSiteId');
-    if (pendingSiteId && currentUser) {
-      showToast('Choose a plan to publish your site!', 'info');
+    if (pendingSiteId && currentUser) showToast('Choose a plan to publish your site! 🚀', 'info');
+  });
+
+  // Auth state — handles Google OAuth redirect
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+      showLoggedIn(session.user.email);
+      document.getElementById('authGateOverlay').classList.remove('show');
+      // If there's a pending plan from before they logged in, proceed to checkout
+      if (pendingPlan) {
+        const plan = pendingPlan; pendingPlan = null;
+        await proceedToCheckout(plan);
+      }
     }
   });
+
+  function showLoggedIn(email) {
+    document.getElementById('userEmailNav').textContent = email;
+    document.getElementById('authNavBtn').textContent  = 'Sign Out';
+  }
+
   function handleAuthNav() {
     if (currentUser) {
       supabase.auth.signOut().then(() => {
         currentUser = null;
         document.getElementById('userEmailNav').textContent = '';
-        document.getElementById('authNavBtn').textContent = 'Sign In';
+        document.getElementById('authNavBtn').textContent  = 'Sign In';
       });
     } else { window.location.href = '/'; }
   }
+
   function setBilling(b) {
     billing = b;
     document.getElementById('btnMonthly').classList.toggle('on', b === 'monthly');
-    document.getElementById('btnAnnual').classList.toggle('on', b === 'annual');
+    document.getElementById('btnAnnual').classList.toggle('on',  b === 'annual');
     document.getElementById('proPrice').textContent = '$' + PRICES.pro[b].amount;
     document.getElementById('bizPrice').textContent = '$' + PRICES.business[b].amount;
     if (b === 'annual') {
@@ -313,49 +396,138 @@
       document.getElementById('bizNote').textContent = 'Billed monthly · cancel anytime';
     }
   }
+
+  // Main checkout handler
   async function handleCheckout(plan) {
     if (!currentUser) {
-      showToast('Sign in first to purchase', 'warn');
-      setTimeout(() => { sessionStorage.setItem('returnTo','pricing'); window.location.href = '/'; }, 1500);
+      // Show sign-in modal, remember which plan they picked
+      pendingPlan = plan;
+      showAuthGate(plan);
       return;
     }
-    let priceId;
-    if (plan === 'pro') priceId = PRICES.pro[billing].id;
-    if (plan === 'business') priceId = PRICES.business[billing].id;
-    const siteId = sessionStorage.getItem('pendingSiteId') || '';
+    await proceedToCheckout(plan);
+  }
+
+  async function proceedToCheckout(plan) {
+    const priceId = PRICES[plan][billing].id;
+    const siteId  = sessionStorage.getItem('pendingSiteId') || '';
     document.getElementById('loadingOverlay').classList.add('show');
     try {
       const res = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId: currentUser.id, userEmail: currentUser.email, siteId })
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          priceId,
+          userId:    currentUser.id,
+          userEmail: currentUser.email,
+          siteId
+        })
       });
       const data = await res.json();
-      if (data.url) { window.location.href = data.url; }
-      else { throw new Error(data.error || 'No checkout URL returned'); }
+      if (data.url) {
+        window.location.href = data.url; // → Stripe Checkout
+      } else {
+        throw new Error(data.error || 'No checkout URL returned from Stripe');
+      }
     } catch(err) {
       document.getElementById('loadingOverlay').classList.remove('show');
       showToast('Error: ' + err.message, 'error');
     }
   }
-  function handleAgencyContact() {
-    window.location.href = 'mailto:hello@clientmint.com?subject=Agency Plan Inquiry&body=Hi, I am interested in the ClientMint Agency plan.';
+
+  // Auth gate for non-logged-in users clicking a plan
+  function showAuthGate(plan) {
+    gateIsSignUp = true;
+    document.getElementById('gateTitle').textContent    = 'Create Your Free Account';
+    document.getElementById('gateSubtitle').textContent = 'Sign up free to complete your ' + capitalize(plan) + ' plan purchase.';
+    document.getElementById('gateSubmitBtn').textContent = 'Create Account & Continue';
+    document.getElementById('gateSwitchLink').innerHTML  = 'Already have an account? <a onclick="gateToggleMode()">Sign in</a>';
+    document.getElementById('authGateOverlay').classList.add('show');
+    clearGateMessages();
   }
+
+  function gateToggleMode() {
+    gateIsSignUp = !gateIsSignUp;
+    document.getElementById('gateTitle').textContent    = gateIsSignUp ? 'Create Your Free Account' : 'Welcome Back';
+    document.getElementById('gateSubmitBtn').textContent = gateIsSignUp ? 'Create Account & Continue' : 'Sign In & Continue';
+    document.getElementById('gateSwitchLink').innerHTML  = gateIsSignUp
+      ? 'Already have an account? <a onclick="gateToggleMode()">Sign in</a>'
+      : 'Don\'t have an account? <a onclick="gateToggleMode()">Sign up free</a>';
+    clearGateMessages();
+  }
+
+  function clearGateMessages() {
+    document.getElementById('gateErr').classList.remove('show');
+    document.getElementById('gateSucc').classList.remove('show');
+  }
+  function showGateErr(msg)  { const el=document.getElementById('gateErr');  el.textContent=msg; el.classList.add('show'); document.getElementById('gateSucc').classList.remove('show'); }
+  function showGateSucc(msg) { const el=document.getElementById('gateSucc'); el.textContent=msg; el.classList.add('show'); document.getElementById('gateErr').classList.remove('show'); }
+
+  async function gateGoogleSignIn() {
+    sessionStorage.setItem('pendingPlan', pendingPlan || '');
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+      if (error) throw error;
+    } catch(e) { showGateErr('Google sign-in failed: ' + e.message); }
+  }
+
+  async function gateSubmit() {
+    const email    = document.getElementById('gateEmail').value.trim();
+    const password = document.getElementById('gatePassword').value.trim();
+    if (!email || !password)  { showGateErr('Please enter your email and password'); return; }
+    if (password.length < 6)  { showGateErr('Password must be at least 6 characters'); return; }
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.textContent = 'Please wait...'; btn.disabled = true;
+    clearGateMessages();
+    try {
+      if (gateIsSignUp) {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.user && data.session) {
+          currentUser = data.user; showLoggedIn(data.user.email);
+          document.getElementById('authGateOverlay').classList.remove('show');
+          if (pendingPlan) { const p=pendingPlan; pendingPlan=null; await proceedToCheckout(p); }
+        } else {
+          showGateSucc('Check your email to confirm your account, then sign in here.');
+          btn.textContent = 'Create Account & Continue'; btn.disabled = false;
+        }
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        currentUser = data.user; showLoggedIn(data.user.email);
+        document.getElementById('authGateOverlay').classList.remove('show');
+        if (pendingPlan) { const p=pendingPlan; pendingPlan=null; await proceedToCheckout(p); }
+      }
+    } catch(e) {
+      showGateErr(e.message);
+      btn.textContent = gateIsSignUp ? 'Create Account & Continue' : 'Sign In & Continue';
+      btn.disabled = false;
+    }
+  }
+
+  function handleAgencyContact() {
+    window.location.href = 'mailto:hello@clientmint.co?subject=Agency Plan Inquiry&body=Hi, I am interested in the ClientMint Agency plan. Please send me more details.';
+  }
+
   function toggleFaq(btn) {
-    const item = btn.closest('.faq-item');
+    const item   = btn.closest('.faq-item');
     const isOpen = item.classList.contains('open');
-    // Close all
     document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
-    // Open clicked if it was closed
     if (!isOpen) item.classList.add('open');
   }
+
   function showToast(msg, type) {
     const t = document.getElementById('toast');
-    t.textContent = (type === 'warn' ? '⚠️ ' : type === 'error' ? '❌ ' : type === 'info' ? 'ℹ️ ' : '✅ ') + msg;
+    t.textContent  = (type === 'warn' ? '⚠️ ' : type === 'error' ? '❌ ' : type === 'info' ? 'ℹ️ ' : '✅ ') + msg;
     t.style.borderColor = type === 'error' ? '#EF4444' : type === 'warn' ? '#F59E0B' : '#10B981';
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 4000);
+    setTimeout(() => t.classList.remove('show'), 5000);
   }
+
+  function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 </script>
 </body>
 </html>

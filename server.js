@@ -284,6 +284,7 @@ async function saveVersion(siteId, html, desc) {
 
 function genPrompt(name, desc, opts, media) {
   const style = (opts&&opts.style)||{};
+  // ── UPGRADED PROMPT v3.0 ──────────────────────────────────────────────────
   const colorScheme = style.colorScheme || '';
   const font = style.font || '';
 
@@ -310,51 +311,105 @@ CSS: background-image: url('${heroPhoto}'); background-size:cover; background-po
 Add a dark overlay: position an absolutely-positioned div with background:rgba(0,0,0,0.55) over it so text stays readable.
 ${aboutPhoto ? `ABOUT/STORY SECTION: Use this real photo as an <img> tag: "${aboutPhoto}" — place it in a side-by-side layout with text on one side and the photo on the other.` : ''}`;
 
-  return `You are an elite web designer at a world-class agency. Create a STUNNING, completely unique single-page website for "${name}".
+  return `You are the world's best web designer — a creative director at a top agency known for charging $25,000 per website. Your sites have won Awwwards, CSS Design Awards, and FWA. Create a jaw-dropping, completely unique single-page website for "${name}".
 
 Business: ${desc}
 
-This website must look like it was built by a top agency charging $15,000. Every pixel must be intentional and perfect. Make it visually distinct — not a generic template.
-
-━━━ REAL MEDIA (USE THESE — DO NOT INVENT URLs) ━━━
+━━━ REAL MEDIA (EMBED THESE — DO NOT INVENT URLS) ━━━
 ${heroMediaBlock}
 
-━━━ DESIGN IDENTITY ━━━
-${colorScheme ? `Color scheme: ${colorScheme}` : `Analyze the business type and choose an industry-perfect color palette. Examples: restaurant = warm amber/deep red, law = navy/gold, tech = electric blue/dark, spa = blush/sage. Never use boring gray-on-white. Pick a bold, memorable identity.`}
-${font ? `Primary font: Import ${font} from Google Fonts` : `Import 2 Google Fonts — a striking display font for headings, a clean readable font for body. Pick fonts that match the brand personality.`}
-- Rich, dark backgrounds OR bold colorful design — never plain white pages
-- Large powerful typography (hero headline 64px+, section headings 42px+)
-- Generous whitespace (sections minimum 100px top/bottom padding)
-- Smooth CSS animations with IntersectionObserver (fade-in, slide-up on scroll)
-- Gradient accents, colored glows, subtle layered shadows
-- Cards with hover transforms (translateY, box-shadow transitions)
-- Modern border-radius (16px–24px on cards)
-- CSS custom properties (--primary, --secondary, --accent, --bg, --text) for consistent theming
-- clip-path or diagonal section dividers for a premium feel
-- At least one section with a bold full-bleed gradient background
+━━━ YOUR CREATIVE MISSION ━━━
+This is NOT a template. You are creating a bespoke digital experience. Look at the business description and design something that feels like it was made exclusively for this exact business — the colors, typography, layout, and tone should ALL reflect who they are.
 
-━━━ REQUIRED SECTIONS (in this order) ━━━
-1. NAVIGATION — sticky, glass-morphism (backdrop-filter:blur(20px)), logo text left + nav links right + CTA button. Collapses to hamburger on mobile.
-2. HERO — Full viewport height (100vh). Massive headline (64px+), compelling subheadline, 2 CTA buttons (primary solid + secondary outline). Use the real media provided above.
-3. SOCIAL PROOF BAR — 3–4 stats with large bold numbers (e.g., "500+ Happy Clients", "10 Years Experience", "4.9★ Rating"). Dark pill/card design.
-4. SERVICES/FEATURES — 6 cards in a CSS grid. Each card: relevant emoji icon, bold title, 2-line description. Strong hover animation (lift + glow).
-5. HOW IT WORKS — 3 numbered steps with large circles, icons, and clear descriptions. Connected with a subtle line/arrow.
-6. ABOUT/STORY — Split layout: compelling paragraph about the business on one side, the real about photo (if provided) on the other.
-7. TESTIMONIALS — 3 testimonials with realistic full names, job titles, companies, 5-star ratings, and quote marks. Card design with subtle background.
-8. CTA SECTION — Bold full-width section, contrasting gradient background, compelling headline, large button.
-9. CONTACT — Styled contact form (name, email, phone, message, submit). Beautiful input styling with focus states.
-10. FOOTER — Logo, tagline, 3-column layout (links, contact info, social icons), copyright ${new Date().getFullYear()}.
+Think: What's the emotion this business should evoke? What's the visual metaphor? What makes this site UNFORGETTABLE?
 
-━━━ SEO (include ALL) ━━━
-- <title>${name} | [Primary Service] | [Location if mentioned]</title>
-- <meta name="description" content="[155 char description]">
-- <meta property="og:title">, <meta property="og:description">, <meta property="og:type" content="website">
-- <meta property="og:image" content="${heroPhoto || ''}">
-- <meta name="viewport" content="width=device-width, initial-scale=1.0">
-- Semantic HTML5: <header>, <main>, <section id="...">, <footer>, <nav>
-- <script type="application/ld+json"> with full LocalBusiness schema
+━━━ DESIGN SYSTEM ━━━
+${colorScheme ? `Color palette: ${colorScheme} — use this as your primary direction` : `Derive the perfect color palette from the business type and personality:
+• Restaurant/cafe → warm amber, deep burgundy, or vibrant fresh greens
+• Law/finance → deep navy, gold accents, authoritative grays  
+• Tech/SaaS → electric blue/purple gradients, dark backgrounds, neon accents
+• Spa/wellness → blush, sage, warm ivory, soft naturals
+• Fitness → bold black/red/orange, high contrast, energetic
+• Medical → clean teal, trustworthy navy, white space
+• Creative/agency → bold contrasts, unexpected colors, editorial feel
+• Real estate → luxury navy/gold or fresh white/green
+• Construction → industrial charcoal, orange, bold structure
+NEVER use gray-on-white. Every business deserves a bold, memorable color identity.`}
 
-━━━ CONTACT FORM (use EXACTLY this JS) ━━━
+${font ? `Typography: Use ${font} imported from Google Fonts as your primary font` : `Pick 2 Google Fonts that feel RIGHT for this specific business:
+• Display font for headlines (something with character — Syne, Fraunces, Bebas Neue, Abril Fatface, DM Serif Display, Cabinet Grotesk, Outfit, Raleway, Cormorant, etc.)
+• Body font for readability (DM Sans, Nunito, Manrope, Source Sans 3, Lato, etc.)
+Import BOTH via Google Fonts link tag. Use them consistently throughout.`}
+
+━━━ VISUAL CRAFT REQUIREMENTS ━━━
+• Hero headline: 72px+ on desktop, uses the display font, letterSpacing tight (-2px to -4px), line-height 1.0–1.1
+• Section headings: 48px+, powerful and bold
+• Body text: 17px–18px for readability, comfortable line-height 1.7
+• Section padding: 100px–130px top/bottom — generous breathing room
+• Cards: border-radius 16px–24px, subtle shadows, transform on hover (translateY -6px)
+• Buttons: border-radius 10px–14px, padding generous (14px 28px+), with hover glow effect
+• Color: Use CSS custom properties (--primary, --secondary, --accent, --bg, --surface, --text, --muted)
+• Atmosphere: Layer backgrounds — gradients, subtle grid/dot patterns, noise textures, geometric shapes
+• Depth: Box shadows, backdrop-filter blur, overlapping elements, z-index layering
+• Premium details: Thin decorative lines, badges/tags, icon+text combinations, numbered sections
+
+━━━ 10 REQUIRED SECTIONS (complete all, in this order) ━━━
+
+1. STICKY NAVIGATION
+   • backdrop-filter:blur(20px) glass effect with semi-transparent background
+   • Logo (business name stylized, left side) + nav links (middle/right) + prominent CTA button
+   • Mobile: hamburger icon, smooth slide-down drawer menu
+   • Active link highlighting based on scroll position
+   • Subtle border-bottom or shadow on scroll
+
+2. HERO — MAKE THIS EXTRAORDINARY
+   • Full viewport height (100vh), centered content
+   • Use the REAL media URL provided above (video or photo) — DO NOT skip this
+   • Dark overlay on media for text legibility
+   • Headline: massive, bold, 1-2 lines max — the most compelling thing about this business
+   • Subheadline: 1-2 sentences expanding on the value proposition  
+   • 2 CTA buttons: primary (filled, main action) + secondary (outline, learn more / scroll down)
+   • Optional: animated badge or social proof snippet (e.g., "⭐ 4.9 · Trusted by 500+ clients")
+
+3. SOCIAL PROOF / TRUST BAR
+   • Dark pill-style cards or a horizontal band
+   • 4 stats: big bold numbers, small labels (e.g., "12+ Years", "500+ Projects", "4.9★ Rating", "$2M+ Revenue Generated")
+   • Subtle animation: numbers count up on scroll, or cards fade in staggered
+   
+4. SERVICES / WHAT WE DO
+   • Section label (small caps), bold heading, brief subtext
+   • 6 service cards in CSS grid (3-col desktop, 2-col tablet, 1-col mobile)
+   • Each: emoji icon, bold title, 2-3 sentence description
+   • Cards: hover lift + color glow border or shadow change
+   
+5. HOW IT WORKS / PROCESS
+   • Numbered steps (1, 2, 3) in large decorative circles
+   • Connected by subtle horizontal line (desktop) or vertical line (mobile)
+   • Each step: title + 2 sentence description
+   • Different background color/tone from the section above
+
+6. ABOUT / STORY
+   • Two-column layout: compelling narrative paragraph on one side, real photo on the other
+   • Use the about photo provided: ${aboutPhoto ? `"${aboutPhoto}"` : 'use a styled placeholder or CSS gradient block'}
+   • Photo: border-radius 16px, slight box-shadow
+   • Include: mission statement, founding story, or key differentiator
+
+7. TESTIMONIALS
+   • 3 testimonial cards in a grid
+   • Each: ★★★★★ stars, 2-3 sentence quote (make it sound real and specific to this business), name, title, company
+   • Card design: subtle background, quote mark decorative element
+   • Staggered fade-in animation
+
+8. CALL TO ACTION BAND
+   • Full-width section with a bold gradient background (use the brand's accent colors)
+   • Large compelling headline (why act now?)
+   • 1-2 sentences of urgency/benefit
+   • Large prominent button — the main conversion action
+
+9. CONTACT SECTION
+   • Two-column: contact info (address, phone, email, hours) on left; form on right
+   • Form inputs: beautifully styled, focus:border-color transition, subtle shadow on focus
+   • MUST use EXACTLY this form code:
 <form id="contact-form">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="email" name="email" placeholder="Email Address" required>
@@ -369,48 +424,55 @@ document.getElementById('contact-form').addEventListener('submit',function(e){
   var btn=this.querySelector('button[type=submit]');btn.textContent='Sending...';btn.disabled=true;
   fetch('/__forms/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(function(r){return r.json()}).then(function(){
-    document.getElementById('contact-form').innerHTML='<div style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">✓</div><h3>Message Sent!</h3><p>We\\'ll be in touch within 24 hours.</p></div>';
+    document.getElementById('contact-form').innerHTML='<div style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">✓</div><h3 style="margin-bottom:.5rem">Message Sent!</h3><p style="color:#94A3B8">We\'ll be in touch within 24 hours.</p></div>';
   }).catch(function(){btn.textContent='Send Message';btn.disabled=false;alert('Please try again.');});
 });
 </script>
 
-━━━ ANIMATIONS (CRITICAL — MUST WORK RELIABLY) ━━━
-Add smooth scroll to html element. Add hover effects on all buttons and cards.
+10. FOOTER
+    • Logo + tagline
+    • 3-column layout: navigation links, contact info, social media icons (Facebook, Instagram, LinkedIn, Twitter/X)
+    • Copyright © ${new Date().getFullYear()} [Business Name]. All rights reserved.
+    • Subtle top border in brand color
 
-For scroll animations use ONLY this pattern — no other animation libraries:
+━━━ SEO — INCLUDE ALL ━━━
+• <title>${name} | [Primary Service] | [City/Location if mentioned]</title>
+• <meta name="description" content="[Compelling 150-155 char description with keywords]">
+• <meta property="og:title">, og:description, og:type="website"
+• <meta property="og:image" content="${heroPhoto || ''}">
+• Semantic HTML5: <header>, <main>, <section id="services">, <section id="about">, etc., <footer>
+• JSON-LD LocalBusiness schema with name, description, url, address (inferred from description)
 
+━━━ ANIMATIONS — USE EXACTLY THIS PATTERN ━━━
 CSS (in <style>):
-.fade-in{opacity:0;transform:translateY(25px);transition:opacity 0.55s ease,transform 0.55s ease}
+.fade-in{opacity:0;transform:translateY(28px);transition:opacity 0.6s ease,transform 0.6s ease}
 .fade-in.visible{opacity:1;transform:translateY(0)}
-.fade-in:nth-child(2){transition-delay:.08s}
-.fade-in:nth-child(3){transition-delay:.16s}
-.fade-in:nth-child(4){transition-delay:.24s}
-.fade-in:nth-child(5){transition-delay:.32s}
-.fade-in:nth-child(6){transition-delay:.40s}
+.fade-in:nth-child(2){transition-delay:.1s}
+.fade-in:nth-child(3){transition-delay:.2s}
+.fade-in:nth-child(4){transition-delay:.3s}
+.fade-in:nth-child(5){transition-delay:.4s}
+.fade-in:nth-child(6){transition-delay:.5s}
 
-JavaScript (place before </body> — use EXACTLY this code, no variations):
+JavaScript (before </body> — copy EXACTLY):
 <script>
 (function(){
   function showEl(el){el.classList.add('visible');}
-  function checkAll(){document.querySelectorAll('.fade-in:not(.visible)').forEach(function(el){var r=el.getBoundingClientRect();if(r.top<window.innerHeight+50)showEl(el);});}
-  // Show everything that's already in view on load
-  window.addEventListener('load',function(){checkAll();setTimeout(checkAll,400);setTimeout(checkAll,1200);});
-  // Show on scroll
+  function checkAll(){document.querySelectorAll('.fade-in:not(.visible)').forEach(function(el){var r=el.getBoundingClientRect();if(r.top<window.innerHeight+60)showEl(el);});}
+  window.addEventListener('load',function(){checkAll();setTimeout(checkAll,300);setTimeout(checkAll,800);setTimeout(checkAll,1500);});
   window.addEventListener('scroll',checkAll,{passive:true});
-  // Absolute fallback: show ALL after 1.5s regardless
-  setTimeout(function(){document.querySelectorAll('.fade-in').forEach(function(el){showEl(el);});},1500);
-  // Active nav on scroll
-  var sections=document.querySelectorAll('section[id]');
-  window.addEventListener('scroll',function(){var pos=window.scrollY+100;sections.forEach(function(s){var a=document.querySelector('nav a[href="#'+s.id+'"]');if(a){if(s.offsetTop<=pos&&s.offsetTop+s.offsetHeight>pos){a.classList.add('active');}else{a.classList.remove('active');}}});},{passive:true});
+  setTimeout(function(){document.querySelectorAll('.fade-in').forEach(function(el){showEl(el);});},2000);
+  var nav=document.querySelector('nav,header');
+  window.addEventListener('scroll',function(){if(nav)nav.style.boxShadow=window.scrollY>50?'0 2px 40px rgba(0,0,0,.3)':'none';},{passive:true});
 })();
 </script>
 
 ━━━ MOBILE RESPONSIVE ━━━
-- Breakpoints: 1024px, 768px, 480px
-- Hamburger menu on mobile with JS toggle
-- Grids: 3-col → 2-col → 1-col
-- Font sizes scale down proportionally
-- Hero video/image still fills screen on mobile
+• Breakpoints at 1024px, 768px, 480px
+• Hamburger menu (☰) on mobile with smooth JS toggle
+• Grid collapses: 3-col → 2-col → 1-col
+• Font sizes scale down: h1 from 72px → 42px → 36px
+• Sections: padding reduces to 70px → 50px on mobile
+• Hero video/image fills screen on all sizes
 
 Return ONLY the complete HTML file. No markdown. No code blocks. No explanations. Start with <!DOCTYPE html>.`;
 }
