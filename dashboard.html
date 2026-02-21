@@ -333,7 +333,7 @@
     const date = new Date(site.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const status = site.published ? '<span class="pill live">● Live</span>' : '<span class="pill draft">○ Draft</span>';
     const planPill = site.plan && site.plan !== 'free' ? `<span class="pill ${site.plan}">${cap(site.plan)}</span>` : '';
-    const origin = window.location.origin.includes('localhost') ? window.location.origin : 'https://clientmint.onrender.com';
+    const origin = window.location.origin;
     const liveUrl = `${origin}/site/${site.slug}`;
 
     const pubBtn = !site.published
