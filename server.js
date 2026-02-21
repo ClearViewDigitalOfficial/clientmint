@@ -242,9 +242,16 @@ function cleanHTML(h) {
 
 async function getUserPlan(userId) {
   try {
-    const r = await supabaseRequest('GET','sites?user_id=eq.'+userId+'&plan=neq.free&order=created_at.desc&limit=1');
-    if (r.data&&r.data[0]) return r.data[0].plan;
-  } catch(e){}
+    // Check all sites for any active paid plan
+    const r = await supabaseRequest('GET','sites?user_id=eq.'+userId+'&order=created_at.desc');
+    if (r.data && Array.isArray(r.data)) {
+      // Priority order: agency > business > pro > free
+      const plans = r.data.map(s => s.plan).filter(Boolean);
+      if (plans.includes('agency')) return 'agency';
+      if (plans.includes('business')) return 'business';
+      if (plans.includes('pro')) return 'pro';
+    }
+  } catch(e){ console.error('getUserPlan error:', e.message); }
   return 'free';
 }
 
@@ -367,14 +374,36 @@ document.getElementById('contact-form').addEventListener('submit',function(e){
 });
 </script>
 
-━━━ ANIMATIONS ━━━
-- IntersectionObserver adds class "visible" when elements scroll into view
-- .fade-in { opacity:0; transform:translateY(30px); transition:opacity 0.6s ease, transform 0.6s ease; }
-- .fade-in.visible { opacity:1; transform:translateY(0); }
-- Staggered delays on grid children (.fade-in:nth-child(2){transition-delay:0.1s} etc up to 6)
-- smooth-scroll on <html>
-- Active nav link highlight on scroll
-- Hover effects on ALL buttons and cards
+━━━ ANIMATIONS (CRITICAL — MUST WORK RELIABLY) ━━━
+Add smooth scroll to html element. Add hover effects on all buttons and cards.
+
+For scroll animations use ONLY this pattern — no other animation libraries:
+
+CSS (in <style>):
+.fade-in{opacity:0;transform:translateY(25px);transition:opacity 0.55s ease,transform 0.55s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.fade-in:nth-child(2){transition-delay:.08s}
+.fade-in:nth-child(3){transition-delay:.16s}
+.fade-in:nth-child(4){transition-delay:.24s}
+.fade-in:nth-child(5){transition-delay:.32s}
+.fade-in:nth-child(6){transition-delay:.40s}
+
+JavaScript (place before </body> — use EXACTLY this code, no variations):
+<script>
+(function(){
+  function showEl(el){el.classList.add('visible');}
+  function checkAll(){document.querySelectorAll('.fade-in:not(.visible)').forEach(function(el){var r=el.getBoundingClientRect();if(r.top<window.innerHeight+50)showEl(el);});}
+  // Show everything that's already in view on load
+  window.addEventListener('load',function(){checkAll();setTimeout(checkAll,400);setTimeout(checkAll,1200);});
+  // Show on scroll
+  window.addEventListener('scroll',checkAll,{passive:true});
+  // Absolute fallback: show ALL after 1.5s regardless
+  setTimeout(function(){document.querySelectorAll('.fade-in').forEach(function(el){showEl(el);});},1500);
+  // Active nav on scroll
+  var sections=document.querySelectorAll('section[id]');
+  window.addEventListener('scroll',function(){var pos=window.scrollY+100;sections.forEach(function(s){var a=document.querySelector('nav a[href="#'+s.id+'"]');if(a){if(s.offsetTop<=pos&&s.offsetTop+s.offsetHeight>pos){a.classList.add('active');}else{a.classList.remove('active');}}});},{passive:true});
+})();
+</script>
 
 ━━━ MOBILE RESPONSIVE ━━━
 - Breakpoints: 1024px, 768px, 480px
@@ -428,9 +457,10 @@ const server = http.createServer(async (req, res) => {
         const siteCount = await getTotalSiteCount(userId);
         if (siteCount >= 1) {
           return json(res,403,{
-            error:'Free plan includes 1 website. Upgrade to Pro for unlimited websites.',
+            error:'Free plan includes 1 website. Upgrade to Pro for unlimited generations.',
             upgradeRequired: true,
-            plan: 'free'
+            plan: 'free',
+            siteCount: siteCount
           });
         }
       }
@@ -635,6 +665,20 @@ const server = http.createServer(async (req, res) => {
     const site = r.data&&r.data[0];
     if (!site) { res.writeHead(404,{'Content-Type':'text/html'}); res.end('<h1>Preview not found</h1>'); return; }
     res.writeHead(200,{'Content-Type':'text/html'}); res.end(site.html); return;
+  }
+
+
+  // ── PUBLISH SITE (upgrade prompt or direct publish for paid users) ─────────
+  if (p === '/api/publish-site' && req.method === 'POST') {
+    const body = JSON.parse(await readBody(req));
+    const {siteId, userId} = body;
+    if (!siteId || !userId) return json(res, 400, {error: 'Missing fields'});
+    const plan = await getUserPlan(userId);
+    if (plan === 'free') {
+      return json(res, 403, {error: 'Upgrade to publish your site.', upgradeRequired: true});
+    }
+    await supabaseRequest('PATCH', 'sites?id=eq.'+siteId+'&user_id=eq.'+userId, {published: true, updated_at: new Date().toISOString()});
+    return json(res, 200, {success: true});
   }
 
   // ── DELETE SITE ───────────────────────────────────────────────────────────────
