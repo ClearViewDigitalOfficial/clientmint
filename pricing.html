@@ -19,7 +19,7 @@
     nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 5%;border-bottom:1px solid var(--b);backdrop-filter:blur(20px);background:rgba(10,15,30,.55)}
     .logo{font-family:'Inter',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.5rem;letter-spacing:-.5px}
     .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--a));border-radius:8px;display:grid;place-items:center;font-size:14px;color:white;flex-shrink:0}
-    .logo span{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo-text{background:linear-gradient(135deg,var(--pl),var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav-links{display:flex;align-items:center;gap:1.75rem}
     .nav-links a{color:var(--tm);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
     .nav-links a:hover,.nav-links a.active{color:var(--t)}
@@ -173,7 +173,7 @@
 </div>
 
 <nav>
-  <a href="/" class="logo"><div class="logo-mark">⚡</div>Client<span>Mint</span></a>
+  <a href="/" class="logo"><div class="logo-mark">⚡</div><span class="logo-text">ClientMint</span></a>
   <div class="nav-links">
     <a href="/">Home</a>
     <a href="/pricing" class="active">Pricing</a>
@@ -227,6 +227,7 @@
       <li class="on"><span class="fi y">✓</span>Publish to a live URL instantly</li>
       <li class="on"><span class="fi y">✓</span>100 AI edits per month</li>
       <li class="on"><span class="fi y">✓</span>Free subdomain included</li>
+      <li class="on"><span class="fi y">✓</span>Custom domain connection</li>
       <li class="on"><span class="fi y">✓</span>SSL certificate included</li>
       <li class="on"><span class="fi y">✓</span>Remove ClientMint badge</li>
     </ul>
@@ -275,7 +276,7 @@
 </div>
 
 <div class="domain-wrap fade4">
-  <div class="domain">
+  <div class="domain" style="cursor:pointer" onclick="handleDomainPromo()">
     <div class="domain-l">
       <div class="domain-icon">🌐</div>
       <div class="domain-text">
@@ -283,7 +284,10 @@
         <p>Premium .com, .io, .co domains — SSL included, auto-connects to your site. Available with any paid plan.</p>
       </div>
     </div>
-    <div class="domain-price">$1 <s>$15</s></div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div class="domain-price">$1 <s>$15</s></div>
+      <span style="background:linear-gradient(135deg,var(--a),var(--p));color:#fff;padding:.6rem 1.2rem;border-radius:10px;font-family:Inter,sans-serif;font-size:.85rem;font-weight:700;white-space:nowrap;cursor:pointer">Learn More →</span>
+    </div>
   </div>
 </div>
 
@@ -423,11 +427,15 @@
           siteId
         })
       });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || 'Server returned ' + res.status + '. Please try again.');
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url; // → Stripe Checkout
       } else {
-        throw new Error(data.error || 'No checkout URL returned from Stripe');
+        throw new Error(data.error || 'No checkout URL returned. Please contact support.');
       }
     } catch(err) {
       document.getElementById('loadingOverlay').classList.remove('show');
@@ -510,6 +518,16 @@
 
   function handleAgencyContact() {
     window.location.href = 'mailto:hello@clientmint.co?subject=Agency Plan Inquiry&body=Hi, I am interested in the ClientMint Agency plan. Please send me more details.';
+  }
+
+  function handleDomainPromo() {
+    if (currentUser) {
+      window.location.href = '/dashboard';
+      showToast('Connect a domain from your dashboard after publishing a site.', 'info');
+    } else {
+      showToast('Sign up for a paid plan first, then connect your domain from the dashboard.', 'info');
+      setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 1500);
+    }
   }
 
   function toggleFaq(btn) {
