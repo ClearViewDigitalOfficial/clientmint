@@ -144,7 +144,7 @@ async function loadEditUsage() {
   if (!currentUser) return;
   try {
     const res = await fetch(USAGE_API + '?userId=' + currentUser.id);
-    if (res.ok) { editUsage = await res.json(); updateUsageDisplay(); }
+    if (res.ok) { editUsage = await res.json(); updateUsageDisplay(); updateUpgradeBar(); }
   } catch(e) {}
 }
 
@@ -317,7 +317,10 @@ async function applyAIEdit() {
   if (isEditing) return;
   const input = document.getElementById('editInput');
   const instruction = input ? input.value.trim() : '';
-  if (!instruction) { alert('Please describe what you want to change'); return; }
+  if (!instruction) { showEditToast('⚠️ Please describe what you want to change'); return; }
+
+  if (!userData.generatedHTML) { showEditToast('⚠️ Generate a website first before editing'); return; }
+  if (!currentUser) { showEditToast('⚠️ Please sign in to edit'); return; }
 
   if (editUsage.remaining <= 0) {
     if (confirm('You\'ve used all ' + editUsage.editLimit + ' edits this month.\n\nUpgrade to Pro for 100 edits/month. Go to pricing?')) goToPricing();
@@ -326,7 +329,8 @@ async function applyAIEdit() {
 
   isEditing = true;
   const btn = document.getElementById('editBtn');
-  if (btn) { btn.textContent = 'Applying...'; btn.disabled = true; }
+  if (btn) { btn.textContent = '⏳ AI is editing...'; btn.disabled = true; }
+  showEditToast('🤖 Applying your edit...');
 
   try {
     const res = await fetch(EDIT_API, {
@@ -343,7 +347,10 @@ async function applyAIEdit() {
       if (confirm((err.error || 'Edit limit reached.') + '\n\nGo to pricing?')) goToPricing();
       return;
     }
-    if (!res.ok) throw new Error('Edit failed. Please try again.');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || errData.message || 'Edit failed (' + res.status + '). Please try again.');
+    }
     const data = await res.json();
     if (!data.html) throw new Error('No response from AI');
     userData.generatedHTML = data.html;
@@ -520,4 +527,51 @@ function goToPricing() {
   window.location.href = '/pricing';
 }
 
-console.log('✅ ClientMint v2.3 loaded');
+// Publish directly for paid users, or redirect to pricing for free users
+async function handlePublishOrUpgrade() {
+  if (!currentUser) { goToPricing(); return; }
+  if (editUsage.plan === 'free') { goToPricing(); return; }
+  // Paid user - publish directly
+  if (!userData.siteId) { showEditToast('⚠️ No site to publish'); return; }
+  const btn = document.getElementById('upgradeBtn');
+  btn.textContent = 'Publishing...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/publish-site', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ siteId: userData.siteId, userId: currentUser.id })
+    });
+    const data = await res.json();
+    if (res.status === 403 && data.upgradeRequired) {
+      goToPricing();
+      return;
+    }
+    if (data.success) {
+      const liveUrl = window.location.origin + '/site/' + userData.slug;
+      document.getElementById('upgradeBarMsg').innerHTML = '✅ Your site is <strong>LIVE</strong> at <a href="'+liveUrl+'" target="_blank" style="color:#10B981;text-decoration:underline">'+liveUrl+'</a>';
+      btn.textContent = '↗ View Live Site';
+      btn.disabled = false;
+      btn.onclick = function() { window.open(liveUrl, '_blank'); };
+      showEditToast('🎉 Site published! It\'s now live.');
+    } else {
+      showEditToast('❌ ' + (data.error || 'Publish failed'));
+      btn.textContent = 'Publish My Site'; btn.disabled = false;
+    }
+  } catch(e) {
+    showEditToast('❌ ' + e.message);
+    btn.textContent = 'Publish My Site'; btn.disabled = false;
+  }
+}
+
+// Update the upgrade bar based on user's plan
+function updateUpgradeBar() {
+  const btn = document.getElementById('upgradeBtn');
+  const msg = document.getElementById('upgradeBarMsg');
+  if (!btn || !msg) return;
+  if (editUsage.plan !== 'free') {
+    btn.textContent = '🚀 Publish My Site';
+    btn.onclick = handlePublishOrUpgrade;
+    msg.textContent = '🎉 Your site is ready! Click publish to make it live.';
+  }
+}
+
+console.log('✅ ClientMint v2.4 loaded');
