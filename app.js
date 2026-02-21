@@ -32,9 +32,18 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     const sn = sessionStorage.getItem('pendingBusinessName');
     const sd = sessionStorage.getItem('pendingBusinessDescription');
     if (sn && sd) {
-      userData.businessName = sn; userData.businessDescription = sd;
+      userData.businessName = sn;
+      userData.businessDescription = sd;
+      userData.options = {
+        style: {
+          colorScheme: sessionStorage.getItem('pendingColorPref') || '',
+          font: sessionStorage.getItem('pendingFontPref') || ''
+        }
+      };
       sessionStorage.removeItem('pendingBusinessName');
       sessionStorage.removeItem('pendingBusinessDescription');
+      sessionStorage.removeItem('pendingColorPref');
+      sessionStorage.removeItem('pendingFontPref');
       startGeneration();
     }
   }
@@ -85,12 +94,20 @@ function showAuthSuccess(msg) { const el=document.getElementById('authSuccess');
 function clearAuthMessages()  { document.getElementById('authError').classList.remove('active'); document.getElementById('authSuccess').classList.remove('active'); }
 
 async function signInWithGoogle() {
-  sessionStorage.setItem('pendingBusinessName', userData.businessName);
-  sessionStorage.setItem('pendingBusinessDescription', userData.businessDescription);
+  sessionStorage.setItem('pendingBusinessName', userData.businessName || document.getElementById('businessName')?.value || '');
+  sessionStorage.setItem('pendingBusinessDescription', userData.businessDescription || document.getElementById('businessDescription')?.value || '');
+  sessionStorage.setItem('pendingColorPref', document.getElementById('colorPref')?.value || '');
+  sessionStorage.setItem('pendingFontPref', document.getElementById('fontPref')?.value || '');
   try {
-    const { error } = await supabaseClient.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.origin } });
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider:'google',
+      options:{ redirectTo: window.location.origin }
+    });
     if (error) throw error;
-  } catch(e) { showAuthError('Google sign-in failed: ' + e.message); }
+  } catch(e) {
+    showAuthError('Google sign-in failed: ' + e.message);
+    console.error('[Auth] Google sign-in error:', e.message);
+  }
 }
 
 document.getElementById('mainForm').addEventListener('submit', async (e) => {
