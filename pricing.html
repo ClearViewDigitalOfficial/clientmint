@@ -227,9 +227,9 @@
       <li class="on"><span class="fi y">✓</span>Publish to a live URL instantly</li>
       <li class="on"><span class="fi y">✓</span>100 AI edits per month</li>
       <li class="on"><span class="fi y">✓</span>Free subdomain included</li>
-      <li class="on"><span class="fi y">✓</span>Custom domain connection</li>
       <li class="on"><span class="fi y">✓</span>SSL certificate included</li>
       <li class="on"><span class="fi y">✓</span>Remove ClientMint badge</li>
+      <li class="off"><span class="fi n">⏳</span>Custom domain (coming soon)</li>
     </ul>
     <button class="cta-btn main" onclick="handleCheckout('pro')"><span>Publish My Website →</span></button>
   </div>
@@ -244,9 +244,9 @@
       <li class="on"><span class="fi y">✓</span>Everything in Pro</li>
       <li class="on"><span class="fi y">✓</span>Up to 5 published websites</li>
       <li class="on"><span class="fi y">✓</span>500 AI edits per month</li>
-      <li class="on"><span class="fi y">✓</span>Custom domain connection</li>
       <li class="on"><span class="fi y">✓</span>Priority AI generation</li>
       <li class="on"><span class="fi y">✓</span>Form submission dashboard</li>
+      <li class="off"><span class="fi n">⏳</span>Custom domain (coming soon)</li>
     </ul>
     <button class="cta-btn main" onclick="handleCheckout('business')"><span>Get Business →</span></button>
   </div>
@@ -276,17 +276,16 @@
 </div>
 
 <div class="domain-wrap fade4">
-  <div class="domain" style="cursor:pointer" onclick="handleDomainPromo()">
+  <div class="domain" style="opacity:0.75">
     <div class="domain-l">
       <div class="domain-icon">🌐</div>
       <div class="domain-text">
-        <h3>Get your custom domain for just $1</h3>
-        <p>Premium .com, .io, .co domains — SSL included, auto-connects to your site. Available with any paid plan.</p>
+        <h3>Custom Domain Connection — <span style="color:var(--a)">Coming Soon</span></h3>
+        <p>Connect your own .com, .io, or .co domain to your ClientMint site. Available on Pro &amp; Business plans. Join the waitlist and we'll notify you when it launches.</p>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
-      <div class="domain-price">$1 <s>$15</s></div>
-      <span style="background:linear-gradient(135deg,var(--a),var(--p));color:#fff;padding:.6rem 1.2rem;border-radius:10px;font-family:Inter,sans-serif;font-size:.85rem;font-weight:700;white-space:nowrap;cursor:pointer">Learn More →</span>
+      <span style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);color:var(--a);padding:.6rem 1.2rem;border-radius:10px;font-family:Inter,sans-serif;font-size:.85rem;font-weight:700;white-space:nowrap">Notify Me →</span>
     </div>
   </div>
 </div>
@@ -327,9 +326,21 @@
 
   <div class="faq-item">
     <button class="faq-q" onclick="toggleFaq(this)">What if I already have a domain name?<span class="faq-icon">+</span></button>
-    <div class="faq-a"><div class="faq-a-inner">You can easily connect your existing domain to your ClientMint website on the Business plan. We support all major domain registrars. If you don't have a domain yet, you can purchase one through us for just $1 with any paid plan.</div></div>
+    <div class="faq-a"><div class="faq-a-inner">You can connect your existing domain to your ClientMint website on the Pro or Business plan. Custom domain connection is coming soon — we'll notify you when it's ready. In the meantime, every published site gets a free subdomain like yourbusiness.clientmint.co.</div></div>
   </div>
 </div>
+
+<footer style="position:relative;z-index:1;background:rgba(10,15,30,.7);border-top:1px solid rgba(148,163,184,0.08);padding:2.5rem 5%;text-align:center;margin-top:2rem">
+  <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-bottom:1rem;font-size:.85rem">
+    <a href="/" style="color:#94A3B8;text-decoration:none">Website Builder</a>
+    <a href="/pricing" style="color:#94A3B8;text-decoration:none">Pricing</a>
+    <a href="/dashboard" style="color:#94A3B8;text-decoration:none">Dashboard</a>
+    <a href="/terms" style="color:#94A3B8;text-decoration:none">Terms</a>
+    <a href="/privacy" style="color:#94A3B8;text-decoration:none">Privacy</a>
+    <a href="mailto:hello@clientmint.co" style="color:#94A3B8;text-decoration:none">Contact</a>
+  </div>
+  <div style="font-size:.75rem;color:#64748B">© 2025 ClientMint. All rights reserved. · <a href="mailto:hello@clientmint.co" style="color:#64748B">hello@clientmint.co</a></div>
+</footer>
 
 <script>
   const SUPABASE_URL      = 'https://lgphbhtizcbmnsaecoje.supabase.co';
@@ -521,13 +532,7 @@
   }
 
   function handleDomainPromo() {
-    if (currentUser) {
-      window.location.href = '/dashboard';
-      showToast('Connect a domain from your dashboard after publishing a site.', 'info');
-    } else {
-      showToast('Sign up for a paid plan first, then connect your domain from the dashboard.', 'info');
-      setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 1500);
-    }
+    showToast('Custom domain connection is coming soon! We\'ll notify you when it launches.', 'info');
   }
 
   function toggleFaq(btn) {
