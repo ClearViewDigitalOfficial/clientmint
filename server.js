@@ -5,7 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
-const DOMAIN = process.env.DOMAIN || 'https://clientmint.onrender.com';
+const DOMAIN = process.env.DOMAIN || 'https://clientmint.co';
 
 const PLAN_LIMITS = {
   free:     { edits: 3,   generates: 1, forms: false, domain: false, logo: false },
@@ -695,7 +695,7 @@ const server = http.createServer(async (req, res) => {
     });
     return json(res,200,{
       success:true,domain:customDomain.toLowerCase(),
-      dns:{type:'CNAME',name:customDomain.toLowerCase(),value:'clientmint.onrender.com',
+      dns:{type:'CNAME',name:customDomain.toLowerCase(),value:'clientmint.co',
         note:'Add this CNAME record at your domain registrar. DNS propagation takes 24-48 hours.'}
     });
   }
@@ -799,9 +799,18 @@ const server = http.createServer(async (req, res) => {
     const raw = await readBody(req);
     const sig = req.headers['stripe-signature'];
     if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
-      if (!verifyStripeWebhook(raw,sig,process.env.STRIPE_WEBHOOK_SECRET)) { res.writeHead(400); res.end('Bad sig'); return; }
+      if (!verifyStripeWebhook(raw,sig,process.env.STRIPE_WEBHOOK_SECRET)) {
+        console.error('[Webhook] Bad signature — possible spoofed request');
+        res.writeHead(400); res.end('Bad sig'); return;
+      }
+    } else if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.warn('[Webhook] STRIPE_WEBHOOK_SECRET not set — skipping signature verification');
     }
-    const evt = JSON.parse(raw);
+    let evt;
+    try { evt = JSON.parse(raw); } catch(e) { console.error('[Webhook] Failed to parse body'); res.writeHead(400); res.end('Bad body'); return; }
+
+    console.log('[Webhook] Received event:', evt.type, '| id:', evt.id);
+
     if (evt.type === 'checkout.session.completed') {
       const s = evt.data.object;
       const uid = s.metadata?.user_id;
@@ -810,15 +819,34 @@ const server = http.createServer(async (req, res) => {
       const custId = s.customer;
       const amt = s.amount_subtotal||0;
       let plan = amt>=4900?'agency':amt>=2400?'business':'pro';
+      console.log('[Webhook] checkout.session.completed — plan:', plan, '| has uid:', !!uid, '| has sid:', !!sid);
       if (sid) {
         await supabaseRequest('PATCH','sites?id=eq.'+sid,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:new Date().toISOString()});
       } else if (uid) {
         const r = await supabaseRequest('GET','sites?user_id=eq.'+uid+'&order=created_at.desc&limit=1');
-        if (r.data&&r.data[0]) await supabaseRequest('PATCH','sites?id=eq.'+r.data[0].id,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:new Date().toISOString()});
+        if (r.data&&r.data[0]) {
+          await supabaseRequest('PATCH','sites?id=eq.'+r.data[0].id,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:new Date().toISOString()});
+          console.log('[Webhook] Updated site', r.data[0].id, 'to plan:', plan);
+        } else {
+          console.warn('[Webhook] checkout.session.completed — no site found for user_id:', uid);
+        }
+      } else {
+        console.warn('[Webhook] checkout.session.completed — no user_id or site_id in metadata');
       }
     }
     if (evt.type === 'customer.subscription.deleted') {
-      await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+evt.data.object.id,{published:false,plan:'free',updated_at:new Date().toISOString()});
+      const subId = evt.data.object.id;
+      console.log('[Webhook] customer.subscription.deleted — subscription:', subId);
+      await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+subId,{published:false,plan:'free',updated_at:new Date().toISOString()});
+    }
+    if (evt.type === 'customer.subscription.updated') {
+      const sub = evt.data.object;
+      console.log('[Webhook] customer.subscription.updated — status:', sub.status, '| subscription:', sub.id);
+      if (sub.status === 'active') {
+        const amt = sub.items?.data?.[0]?.price?.unit_amount || 0;
+        const plan = amt>=4900?'agency':amt>=2400?'business':'pro';
+        await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+sub.id,{plan,updated_at:new Date().toISOString()});
+      }
     }
     return json(res,200,{received:true});
   }
