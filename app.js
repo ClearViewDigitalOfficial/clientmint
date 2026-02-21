@@ -13,7 +13,7 @@ let userData = { businessName: '', businessDescription: '', generatedHTML: '', s
 let isSignUp = true;
 let currentUser = null;
 let editUsage = { plan: 'free', editCount: 0, editLimit: 5, remaining: 5 };
-let previewMode = 'desktop'; // desktop | tablet | mobile
+let previewMode = 'desktop';
 
 // ─── AUTH ────────────────────────────────────────────────
 
@@ -185,9 +185,11 @@ async function startGeneration() {
   } catch(e) {
     if (timeoutId) clearTimeout(timeoutId);
     if (progressInterval) clearInterval(progressInterval);
-    hideLoadingScreen();
-    alert('Generation Failed\n\n' + e.message);
-    showHomeScreen();
+    if (e.message !== 'UPGRADE_REQUIRED') {
+      hideLoadingScreen();
+      alert('Generation Failed\n\n' + e.message);
+      showHomeScreen();
+    }
   }
 }
 
@@ -223,6 +225,16 @@ async function generateWebsiteWithAI() {
     throw new Error(err.message || err.error || 'Server error (' + res.status + ')');
   }
   const data = await res.json();
+  if (data.upgradeRequired) {
+    sessionStorage.setItem('pendingBusinessName', userData.businessName);
+    sessionStorage.setItem('pendingBusinessDescription', userData.businessDescription);
+    hideLoadingScreen();
+    showHomeScreen();
+    if (confirm('You already have a free website!\n\nUpgrade to Pro for unlimited websites.\n\nGo to pricing now?')) {
+      window.location.href = '/pricing';
+    }
+    throw new Error('UPGRADE_REQUIRED');
+  }
   if (!data.html) throw new Error('No website generated.');
   userData.generatedHTML = data.html;
   if (data.siteId) userData.siteId = data.siteId;
@@ -234,6 +246,35 @@ function displayGeneratedWebsite() {
   if (!userData.generatedHTML) return;
   const doc = iframe.contentWindow.document;
   doc.open(); doc.write(userData.generatedHTML); doc.close();
+
+  // Force all animated sections visible — fixes blank sections bug
+  function forceVisible() {
+    try {
+      const iDoc = iframe.contentWindow.document;
+      if (!iDoc || !iDoc.head) return;
+      const style = iDoc.createElement('style');
+      style.id = 'clientmint-force-visible';
+      style.textContent = `
+        .fade-in, [class*='fade'], [class*='animate'], [class*='hidden'], [class*='invisible'] {
+          opacity: 1 !important;
+          transform: none !important;
+          visibility: visible !important;
+        }
+        * { animation-play-state: running !important; }
+      `;
+      if (!iDoc.getElementById('clientmint-force-visible')) {
+        iDoc.head.appendChild(style);
+      }
+      iDoc.querySelectorAll('[class*="fade"]').forEach(el => {
+        el.classList.add('visible', 'show', 'in-view', 'active');
+      });
+    } catch(e) {}
+  }
+
+  iframe.onload = () => { forceVisible(); setTimeout(forceVisible, 500); };
+  setTimeout(forceVisible, 300);
+  setTimeout(forceVisible, 1000);
+  setTimeout(forceVisible, 2500);
 }
 
 // ─── AI EDITING ─────────────────────────────────────────
@@ -246,7 +287,6 @@ async function applyAIEdit() {
   const instruction = input ? input.value.trim() : '';
   if (!instruction) { alert('Describe what you want to change'); return; }
 
-  // Check limits client-side
   if (editUsage.remaining <= 0) {
     alert('You\'ve used all ' + editUsage.editLimit + ' edits this month.\n\nUpgrade your plan for more edits.');
     return;
@@ -278,7 +318,7 @@ async function applyAIEdit() {
     displayGeneratedWebsite();
     if (input) input.value = '';
     showEditToast('✅ Changes applied!');
-    loadEditUsage(); // refresh usage
+    loadEditUsage();
   } catch(e) {
     showEditToast('❌ ' + e.message);
   } finally {
@@ -319,16 +359,10 @@ async function generateLogo() {
         userId: currentUser.id
       })
     });
-    if (res.status === 403) {
-      alert('Logo generation requires a Pro or Business plan.');
-      return;
-    }
+    if (res.status === 403) { alert('Logo generation requires a Pro or Business plan.'); return; }
     if (!res.ok) throw new Error('Logo generation failed');
     const data = await res.json();
-    if (data.svg) {
-      showLogoPreview(data.svg);
-      showEditToast('✅ Logo generated!');
-    }
+    if (data.svg) { showLogoPreview(data.svg); showEditToast('✅ Logo generated!'); }
   } catch(e) {
     showEditToast('❌ ' + e.message);
   } finally {
@@ -380,13 +414,9 @@ function setPreviewMode(mode) {
   previewMode = mode;
   const iframe = document.getElementById('previewFrame');
   if (!iframe) return;
-
-  // Update button states
   document.querySelectorAll('.preview-mode-btn').forEach(b => b.classList.remove('active'));
   const activeBtn = document.getElementById('preview-' + mode);
   if (activeBtn) activeBtn.classList.add('active');
-
-  // Set iframe width
   switch(mode) {
     case 'mobile': iframe.style.maxWidth = '375px'; break;
     case 'tablet': iframe.style.maxWidth = '768px'; break;
@@ -400,18 +430,15 @@ function setPreviewMode(mode) {
 
 async function showVersionHistory() {
   if (!userData.siteId || !currentUser) return;
-
   try {
     const res = await fetch(VERSIONS_API + '?siteId=' + userData.siteId);
     if (!res.ok) throw new Error('Failed to load versions');
     const versions = await res.json();
-
     let modal = document.getElementById('versionModal');
     if (modal) modal.remove();
     modal = document.createElement('div');
     modal.id = 'versionModal';
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:10000';
-
     const list = versions.map(v => {
       const date = new Date(v.created_at).toLocaleString();
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem;border-bottom:1px solid rgba(148,163,184,.1)">
@@ -419,7 +446,6 @@ async function showVersionHistory() {
         <button onclick="restoreVersion('${v.id}')" style="padding:.4rem .8rem;background:rgba(99,102,241,.15);color:#818CF8;border:1px solid rgba(99,102,241,.25);border-radius:6px;font-size:.75rem;cursor:pointer">Restore</button>
       </div>`;
     }).join('');
-
     modal.innerHTML = `
       <div style="background:#1E293B;border:1px solid rgba(148,163,184,.15);border-radius:18px;padding:2rem;max-width:500px;width:90%;max-height:80vh;overflow-y:auto" onclick="event.stopPropagation()">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
@@ -437,7 +463,6 @@ async function showVersionHistory() {
 async function restoreVersion(versionId) {
   if (!userData.siteId || !currentUser) return;
   if (!confirm('Restore this version? Current changes will be saved as a version first.')) return;
-
   try {
     const res = await fetch('/api/restore-version', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -456,7 +481,6 @@ async function restoreVersion(versionId) {
 
 function exportSite() {
   if (!userData.siteId || !currentUser) {
-    // Export from memory if no siteId
     const blob = new Blob([userData.generatedHTML], { type: 'text/html' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -476,4 +500,4 @@ document.getElementById('upgradeBtn').addEventListener('click', () => {
   window.location.href = '/pricing';
 });
 
-console.log('✅ ClientMint v2.0 loaded');
+console.log('✅ ClientMint v2.1 loaded');
