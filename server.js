@@ -508,6 +508,7 @@ const server = http.createServer(async (req, res) => {
     const body = JSON.parse(await readBody(req));
     const {businessName,businessDescription,userId,options} = body;
     if (!businessName||!businessDescription) return json(res,400,{error:'Missing fields'});
+    if (!process.env.ANTHROPIC_API_KEY) return json(res,500,{error:'AI service not configured. Please contact support.'});
 
     const rk = userId||req.socket.remoteAddress||'anon';
     if (!checkRateLimit('gen:'+rk,3,60000)) return json(res,429,{error:'Too many requests. Wait a minute.'});
@@ -554,6 +555,7 @@ const server = http.createServer(async (req, res) => {
     const body = JSON.parse(await readBody(req));
     const {currentHTML,editInstruction,siteId,userId} = body;
     if (!currentHTML||!editInstruction) return json(res,400,{error:'Missing fields'});
+    if (!process.env.ANTHROPIC_API_KEY) return json(res,500,{error:'AI service not configured. Please contact support.'});
 
     const rk = userId||req.socket.remoteAddress||'anon';
     if (!checkRateLimit('edit:'+rk,10,60000)) return json(res,429,{error:'Too many edits. Wait a minute.'});
@@ -767,18 +769,29 @@ const server = http.createServer(async (req, res) => {
     const body = JSON.parse(await readBody(req));
     const {priceId,userId,userEmail,siteId} = body;
     if (!priceId||!userId) return json(res,400,{error:'Missing priceId or userId'});
-    const params = {
-      'payment_method_types[]':'card','mode':'subscription',
-      'line_items[0][price]':priceId,'line_items[0][quantity]':'1',
-      'success_url':DOMAIN+'/success?session_id={CHECKOUT_SESSION_ID}&site_id='+(siteId||''),
-      'cancel_url':DOMAIN+'/pricing',
-      'metadata[user_id]':userId,'metadata[site_id]':siteId||'',
-      'allow_promotion_codes':'true'
-    };
-    if (userEmail) params['customer_email']=userEmail;
-    const session = await stripeRequest('POST','checkout/sessions',params);
-    if (session.status!==200) throw new Error(session.data?.error?.message||'Stripe error');
-    return json(res,200,{url:session.data.url});
+    if (!process.env.STRIPE_SECRET_KEY) return json(res,500,{error:'Stripe is not configured yet. Please contact support at hello@clientmint.co'});
+    try {
+      const params = {
+        'payment_method_types[]':'card','mode':'subscription',
+        'line_items[0][price]':priceId,'line_items[0][quantity]':'1',
+        'success_url':DOMAIN+'/success?session_id={CHECKOUT_SESSION_ID}&site_id='+(siteId||''),
+        'cancel_url':DOMAIN+'/pricing',
+        'metadata[user_id]':userId,'metadata[site_id]':siteId||'',
+        'allow_promotion_codes':'true'
+      };
+      if (userEmail) params['customer_email']=userEmail;
+      const session = await stripeRequest('POST','checkout/sessions',params);
+      if (session.status!==200) {
+        const errMsg = session.data?.error?.message || 'Stripe returned status '+session.status;
+        console.error('Stripe checkout error:', JSON.stringify(session.data));
+        return json(res,500,{error:'Payment setup failed: '+errMsg});
+      }
+      if (!session.data?.url) return json(res,500,{error:'Stripe did not return a checkout URL. Check your Stripe price IDs.'});
+      return json(res,200,{url:session.data.url});
+    } catch(e) {
+      console.error('Checkout exception:', e.message);
+      return json(res,500,{error:'Checkout failed: '+e.message});
+    }
   }
 
   // ── STRIPE WEBHOOK ────────────────────────────────────────────────────────────
@@ -853,11 +866,22 @@ const server = http.createServer(async (req, res) => {
 
   // ── HEALTH ────────────────────────────────────────────────────────────────────
   if (p === '/health') return json(res,200,{
-    ok:true, v:'2.2.0',
+    ok:true, v:'2.3.0',
     stripe:!!process.env.STRIPE_SECRET_KEY,
+    stripe_webhook:!!process.env.STRIPE_WEBHOOK_SECRET,
     anthropic:!!process.env.ANTHROPIC_API_KEY,
     supabase:!!process.env.SUPABASE_URL,
-    pexels:!!process.env.PEXELS_API_KEY
+    supabase_key:!!process.env.SUPABASE_SERVICE_KEY,
+    pexels:!!process.env.PEXELS_API_KEY,
+    domain: DOMAIN,
+    missing: [
+      !process.env.STRIPE_SECRET_KEY && 'STRIPE_SECRET_KEY',
+      !process.env.STRIPE_WEBHOOK_SECRET && 'STRIPE_WEBHOOK_SECRET',
+      !process.env.ANTHROPIC_API_KEY && 'ANTHROPIC_API_KEY',
+      !process.env.SUPABASE_URL && 'SUPABASE_URL',
+      !process.env.SUPABASE_SERVICE_KEY && 'SUPABASE_SERVICE_KEY',
+      !process.env.PEXELS_API_KEY && 'PEXELS_API_KEY'
+    ].filter(Boolean)
   });
 
   // ── STATIC FILES ──────────────────────────────────────────────────────────────
@@ -882,7 +906,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('ClientMint v2.2 on port '+PORT);
+  console.log('ClientMint v2.4 on port '+PORT);
   console.log('Stripe:',process.env.STRIPE_SECRET_KEY?'✅':'❌');
   console.log('Anthropic:',process.env.ANTHROPIC_API_KEY?'✅':'❌');
   console.log('Supabase:',process.env.SUPABASE_URL?'✅':'❌');
