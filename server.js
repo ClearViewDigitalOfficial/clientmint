@@ -4,15 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+// SINGLE SOURCE OF TRUTH: all plan limits live in lib/plans.js
+const { PLANS, STRIPE_PRICES, normalizePlan, getPlan, MAX_GLOBAL_TOKENS_PER_MONTH } = require('./lib/plans');
+
 const PORT = process.env.PORT || 3000;
 const DOMAIN = process.env.DOMAIN || 'https://clientmint.co';
-
-const PLAN_LIMITS = {
-  free:     { edits: 3,   generates: 1, forms: false, domain: false, logo: false },
-  pro:      { edits: 100, generates: 99, forms: true,  domain: true,  logo: true  },
-  business: { edits: 500, generates: 99, forms: true,  domain: true,  logo: true  },
-  agency:   { edits: 750, generates: 99, forms: true,  domain: true,  logo: true  }
-};
 
 const rateLimits = {};
 function checkRateLimit(key, max, windowMs) {
@@ -176,7 +172,12 @@ function makeSlug(name) {
 
 function callAnthropic(messages, maxTokens) {
   return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:maxTokens||8000, messages});
+    // ── MODEL SELECTION ──────────────────────────────────────────────────────
+    // Using claude-haiku-4-5-20251001 (Haiku) for cost efficiency.
+    // To switch to a smarter/more expensive model, change the model string below.
+    // Claude Sonnet: 'claude-sonnet-4-6'   (higher quality, higher cost)
+    // Claude Haiku:  'claude-haiku-4-5-20251001' (fast, cheap — current choice)
+    const payload = JSON.stringify({model:'claude-haiku-4-5-20251001', max_tokens:maxTokens||8000, messages});
     const req = https.request({
       hostname:'api.anthropic.com', path:'/v1/messages', method:'POST',
       headers: {
@@ -188,8 +189,13 @@ function callAnthropic(messages, maxTokens) {
       let d = '';
       res.on('data', c => d += c);
       res.on('end', () => {
-        if (res.statusCode !== 200) return reject(new Error('Anthropic '+res.statusCode));
-        try { const p = JSON.parse(d); resolve(p.content&&p.content[0]?p.content[0].text:''); }
+        if (res.statusCode !== 200) return reject(new Error('Anthropic '+res.statusCode+': '+d));
+        try {
+          const p = JSON.parse(d);
+          const text = p.content&&p.content[0]?p.content[0].text:'';
+          const usage = p.usage || { input_tokens: 0, output_tokens: 0 };
+          resolve({ text, usage });
+        }
         catch { reject(new Error('Parse error')); }
       });
     });
@@ -240,19 +246,118 @@ function cleanHTML(h) {
   return c;
 }
 
-async function getUserPlan(userId) {
+async function getUserProfile(userId) {
   try {
-    // Check all sites for any active paid plan
+    const r = await supabaseRequest('GET','profiles?user_id=eq.'+userId+'&limit=1');
+    if (r.data && Array.isArray(r.data) && r.data[0]) return r.data[0];
+  } catch(e){ console.error('[getUserProfile] error:', e.message); }
+  return null;
+}
+
+async function getUserPlan(userId) {
+  const profile = await getUserProfile(userId);
+  if (profile && profile.plan) return normalizePlan(profile.plan);
+  // Fallback: check sites table for legacy plan storage
+  try {
     const r = await supabaseRequest('GET','sites?user_id=eq.'+userId+'&order=created_at.desc');
     if (r.data && Array.isArray(r.data)) {
-      // Priority order: agency > business > pro > free
       const plans = r.data.map(s => s.plan).filter(Boolean);
       if (plans.includes('agency')) return 'agency';
       if (plans.includes('business')) return 'business';
-      if (plans.includes('pro')) return 'pro';
+      if (plans.includes('starter') || plans.includes('pro')) return 'starter';
     }
-  } catch(e){ console.error('getUserPlan error:', e.message); }
+  } catch(e){ console.error('[getUserPlan] sites fallback error:', e.message); }
   return 'free';
+}
+
+// Checks and enforces per-user AI edit limits.
+// Returns { allowed: true } or { allowed: false, code, plan, limit, used }
+async function checkAndIncrementEditLimit(userId) {
+  const plan = await getUserPlan(userId);
+  const planConfig = getPlan(plan);
+  const limit = planConfig.aiEditsPerMonth;
+
+  // Get or create profile row
+  let profile = await getUserProfile(userId);
+  const now = new Date();
+
+  if (!profile) {
+    // Create a minimal profile row
+    try {
+      await supabaseRequest('POST','profiles',{
+        user_id: userId, plan: 'free',
+        ai_edits_used: 0, ai_edits_reset_at: now.toISOString()
+      });
+      profile = { plan: 'free', ai_edits_used: 0, ai_edits_reset_at: now.toISOString() };
+    } catch(e) {
+      console.error('[checkEditLimit] Could not create profile:', e.message);
+      // Allow the call if we can't check limits (fail open, not closed)
+      return { allowed: true, plan, limit };
+    }
+  }
+
+  // Reset counter if it's been more than 30 days
+  let editsUsed = profile.ai_edits_used || 0;
+  const resetAt = profile.ai_edits_reset_at ? new Date(profile.ai_edits_reset_at) : null;
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  if (!resetAt || resetAt < thirtyDaysAgo) {
+    editsUsed = 0;
+    try {
+      await supabaseRequest('PATCH','profiles?user_id=eq.'+userId,{
+        ai_edits_used: 0, ai_edits_reset_at: now.toISOString()
+      });
+    } catch(e) { console.error('[checkEditLimit] Reset failed:', e.message); }
+  }
+
+  if (editsUsed >= limit) {
+    return { allowed: false, code: 'AI_LIMIT_REACHED', plan, limit, used: editsUsed };
+  }
+
+  // Increment usage
+  try {
+    await supabaseRequest('PATCH','profiles?user_id=eq.'+userId,{
+      ai_edits_used: editsUsed + 1
+    });
+  } catch(e) { console.error('[checkEditLimit] Increment failed:', e.message); }
+
+  return { allowed: true, plan, limit, used: editsUsed + 1 };
+}
+
+// ─── GLOBAL SAFETY CAP ───────────────────────────────────────────────────────
+// Tracks total tokens used this calendar month across ALL users.
+// If the cap is exceeded, AI calls are blocked until next month.
+async function checkGlobalTokenCap(tokensToAdd) {
+  const monthKey = new Date().toISOString().substring(0,7); // e.g. "2026-02"
+  try {
+    const r = await supabaseRequest('GET','global_usage?month=eq.'+monthKey+'&limit=1');
+    const row = r.data && r.data[0];
+    const currentTokens = row ? (row.total_tokens || 0) : 0;
+
+    if (currentTokens >= MAX_GLOBAL_TOKENS_PER_MONTH) {
+      console.error('[GlobalCap] BLOCKED — monthly token cap reached:', currentTokens, '/', MAX_GLOBAL_TOKENS_PER_MONTH);
+      return false;
+    }
+
+    // Increment
+    if (tokensToAdd) {
+      if (row) {
+        await supabaseRequest('PATCH','global_usage?month=eq.'+monthKey,{
+          total_tokens: currentTokens + tokensToAdd,
+          updated_at: new Date().toISOString()
+        });
+      } else {
+        await supabaseRequest('POST','global_usage',{
+          month: monthKey, total_tokens: tokensToAdd,
+          updated_at: new Date().toISOString()
+        });
+      }
+    }
+  } catch(e) {
+    // If we can't check the cap, log and allow (don't block users due to DB issues)
+    console.error('[GlobalCap] Could not check token cap:', e.message);
+  }
+  return true;
 }
 
 async function getMonthlyEditCount(userId) {
@@ -513,28 +618,48 @@ const server = http.createServer(async (req, res) => {
     const rk = userId||req.socket.remoteAddress||'anon';
     if (!checkRateLimit('gen:'+rk,3,60000)) return json(res,429,{error:'Too many requests. Wait a minute.'});
 
-    // Enforce free tier: 1 site only
+    // Enforce site creation + AI edit limits from PLANS (lib/plans.js)
     if (userId) {
       const plan = await getUserPlan(userId);
-      if (plan === 'free') {
-        const siteCount = await getTotalSiteCount(userId);
-        if (siteCount >= 1) {
-          return json(res,403,{
-            error:'Free plan includes 1 website. Upgrade to Pro for unlimited generations.',
-            upgradeRequired: true,
-            plan: 'free',
-            siteCount: siteCount
-          });
-        }
+      const planConfig = getPlan(plan);
+      const siteCount = await getTotalSiteCount(userId);
+      if (siteCount >= planConfig.maxTotalSites) {
+        return json(res,403,{
+          error: 'Your ' + planConfig.name + ' plan allows ' + planConfig.maxTotalSites + ' site(s). Delete an existing site or upgrade to create more.',
+          code: 'SITE_LIMIT_REACHED',
+          plan: plan,
+          planName: planConfig.name,
+          siteCount: siteCount,
+          siteLimit: planConfig.maxTotalSites,
+          upgradeRequired: true
+        });
+      }
+      const limitCheck = await checkAndIncrementEditLimit(userId);
+      if (!limitCheck.allowed) {
+        return json(res,403,{
+          error: 'You have used all ' + limitCheck.limit + ' AI actions for this month. Upgrade your plan for more.',
+          code: 'AI_LIMIT_REACHED',
+          plan: limitCheck.plan,
+          limit: limitCheck.limit,
+          used: limitCheck.used,
+          upgradeRequired: true
+        });
       }
     }
 
-    // ── Fetch Pexels media BEFORE calling Claude ──────────────────────────────
-    console.log('Fetching Pexels media for:', businessName);
-    const media = await fetchPexelsMedia(businessName, businessDescription);
-    console.log('Media fetched — heroVideo:', !!media.heroVideo, 'heroPhoto:', !!media.heroPhoto);
+    // Global safety cap check
+    const capOk = await checkGlobalTokenCap(0);
+    if (!capOk) return json(res,503,{error:'Service temporarily at capacity. Please try again later or contact hello@clientmint.co'});
 
-    const html = cleanHTML(await callAnthropic([{role:'user',content:genPrompt(businessName,businessDescription,options,media)}]));
+    console.log('[Generate] Fetching Pexels media for:', businessName);
+    const media = await fetchPexelsMedia(businessName, businessDescription);
+    console.log('[Generate] Media fetched — heroVideo:', !!media.heroVideo, 'heroPhoto:', !!media.heroPhoto);
+
+    const result = await callAnthropic([{role:'user',content:genPrompt(businessName,businessDescription,options,media)}]);
+    const html = cleanHTML(result.text);
+    const tokensUsed = (result.usage.input_tokens || 0) + (result.usage.output_tokens || 0);
+    await checkGlobalTokenCap(tokensUsed);
+    console.log('[Generate] Tokens used:', tokensUsed, '| user:', userId||'anon');
 
     let siteId=null, slug=null;
     if (userId) {
@@ -560,16 +685,26 @@ const server = http.createServer(async (req, res) => {
     const rk = userId||req.socket.remoteAddress||'anon';
     if (!checkRateLimit('edit:'+rk,10,60000)) return json(res,429,{error:'Too many edits. Wait a minute.'});
 
+    // Enforce per-user AI edit limits from PLANS (lib/plans.js)
     if (userId) {
-      const plan = await getUserPlan(userId);
-      const lim = PLAN_LIMITS[plan]||PLAN_LIMITS.free;
-      const cnt = await getMonthlyEditCount(userId);
-      if (cnt >= lim.edits) return json(res,403,{
-        error:'You\'ve used all ' + lim.edits + ' free AI edits. Upgrade to Pro for 100 edits/month.',
-        editCount:cnt, editLimit:lim.edits, plan,
-        upgradeRequired: true
-      });
+      const limitCheck = await checkAndIncrementEditLimit(userId);
+      if (!limitCheck.allowed) {
+        const planConfig = getPlan(limitCheck.plan);
+        const upgradeTo = limitCheck.plan === 'free' ? 'Launch' : limitCheck.plan === 'starter' ? 'Business' : 'Agency';
+        return json(res,403,{
+          error: 'You have used all ' + limitCheck.limit + ' AI edits for this month. Upgrade to ' + upgradeTo + ' for more.',
+          code: 'AI_LIMIT_REACHED',
+          plan: limitCheck.plan,
+          limit: limitCheck.limit,
+          used: limitCheck.used,
+          upgradeRequired: true
+        });
+      }
     }
+
+    // Global safety cap check
+    const capOk = await checkGlobalTokenCap(0);
+    if (!capOk) return json(res,503,{error:'Service temporarily at capacity. Please try again later.'});
 
     if (siteId) await saveVersion(siteId,currentHTML,'Before: '+editInstruction.substring(0,50));
 
@@ -584,7 +719,11 @@ const server = http.createServer(async (req, res) => {
       '- Improve visual quality if possible while making the change\n'+
       '- Return the COMPLETE updated HTML file. No markdown. No code blocks.'
     }];
-    const html = cleanHTML(await callAnthropic(msg,8000));
+    const result = await callAnthropic(msg,8000);
+    const html = cleanHTML(result.text);
+    const tokensUsed = (result.usage.input_tokens || 0) + (result.usage.output_tokens || 0);
+    await checkGlobalTokenCap(tokensUsed);
+    console.log('[Edit] Tokens used:', tokensUsed, '| user:', userId||'anon');
 
     if (siteId&&userId) {
       await supabaseRequest('PATCH','sites?id=eq.'+siteId+'&user_id=eq.'+userId,{html,updated_at:new Date().toISOString()});
@@ -603,11 +742,12 @@ const server = http.createServer(async (req, res) => {
 
     if (userId) {
       const plan = await getUserPlan(userId);
-      if (plan === 'free') return json(res,403,{error:'Logo generation requires Pro or Business plan.',upgradeRequired:true});
+      const planConfig = getPlan(plan);
+      if (!planConfig.logo) return json(res,403,{error:'Logo generation requires Business or Agency plan. Upgrade to unlock AI logos.',upgradeRequired:true,code:'UPGRADE_REQUIRED'});
     }
 
-    let svg = await callAnthropic([{role:'user',content:logoPrompt(businessName,businessDescription)}],2000);
-    svg = svg.trim().replace(/^```(svg|xml)?\s*/i,'').replace(/\s*```$/i,'');
+    const logoResult = await callAnthropic([{role:'user',content:logoPrompt(businessName,businessDescription)}],2000);
+    let svg = logoResult.text.trim().replace(/^```(svg|xml)?\s*/i,'').replace(/\s*```$/i,'');
     const i = svg.indexOf('<svg');
     if (i > 0) svg = svg.substring(i);
 
@@ -620,14 +760,20 @@ const server = http.createServer(async (req, res) => {
     const userId = urlObj.searchParams.get('userId');
     if (!userId) return json(res,400,{error:'Missing userId'});
     const plan = await getUserPlan(userId);
-    const lim = PLAN_LIMITS[plan]||PLAN_LIMITS.free;
-    const cnt = await getMonthlyEditCount(userId);
+    const planConfig = getPlan(plan);
+    const profile = await getUserProfile(userId);
+    const editsUsed = profile ? (profile.ai_edits_used || 0) : 0;
     const siteCount = await getTotalSiteCount(userId);
     return json(res,200,{
-      plan, editCount:cnt, editLimit:lim.edits,
-      remaining:Math.max(0,lim.edits-cnt),
-      siteCount, siteLimit: lim.generates,
-      features:lim
+      plan,
+      planName: planConfig.name,
+      editCount: editsUsed,
+      editLimit: planConfig.aiEditsPerMonth,
+      remaining: Math.max(0, planConfig.aiEditsPerMonth - editsUsed),
+      siteCount,
+      siteLimit: planConfig.maxTotalSites,
+      publishLimit: planConfig.maxPublishedSites,
+      features: planConfig
     });
   }
 
@@ -689,7 +835,8 @@ const server = http.createServer(async (req, res) => {
     if (!/^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/.test(customDomain))
       return json(res,400,{error:'Invalid domain format'});
     const plan = await getUserPlan(userId);
-    if (!PLAN_LIMITS[plan].domain) return json(res,403,{error:'Custom domains require Pro or Business plan.',upgradeRequired:true});
+    const planConfig2 = getPlan(plan);
+    if (!planConfig2.customDomain) return json(res,403,{error:'Custom domains require Launch plan or higher. Upgrade to connect your own domain.',upgradeRequired:true,code:'UPGRADE_REQUIRED'});
     await supabaseRequest('PATCH','sites?id=eq.'+siteId+'&user_id=eq.'+userId,{
       custom_domain:customDomain.toLowerCase(),domain_status:'pending_dns',updated_at:new Date().toISOString()
     });
@@ -732,16 +879,47 @@ const server = http.createServer(async (req, res) => {
   }
 
 
-  // ── PUBLISH SITE (upgrade prompt or direct publish for paid users) ─────────
+  // ── PUBLISH SITE ─────────────────────────────────────────────────────────────
   if (p === '/api/publish-site' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
     const {siteId, userId} = body;
     if (!siteId || !userId) return json(res, 400, {error: 'Missing fields'});
+
     const plan = await getUserPlan(userId);
-    if (plan === 'free') {
-      return json(res, 403, {error: 'Upgrade to publish your site.', upgradeRequired: true});
+    const planConfig = getPlan(plan);
+
+    // Free plan cannot publish
+    if (planConfig.maxPublishedSites === 0) {
+      return json(res, 403, {
+        error: 'Publishing requires a paid plan. Upgrade to Launch ($9/mo) to publish your site live.',
+        code: 'PUBLISH_LIMIT_REACHED',
+        plan: plan,
+        upgradeRequired: true
+      });
     }
+
+    // Count currently published sites
+    const pubResult = await supabaseRequest('GET', 'sites?user_id=eq.'+userId+'&published=eq.true&select=id');
+    const publishedCount = Array.isArray(pubResult.data) ? pubResult.data.length : 0;
+
+    // Check if THIS site is already published (don't count it against limit on re-publish)
+    const thisSite = await supabaseRequest('GET', 'sites?id=eq.'+siteId+'&user_id=eq.'+userId+'&select=published');
+    const alreadyPublished = thisSite.data && thisSite.data[0] && thisSite.data[0].published;
+
+    if (!alreadyPublished && publishedCount >= planConfig.maxPublishedSites) {
+      return json(res, 403, {
+        error: 'Your ' + planConfig.name + ' plan allows ' + planConfig.maxPublishedSites + ' published site(s). Upgrade to publish more.',
+        code: 'PUBLISH_LIMIT_REACHED',
+        plan: plan,
+        planName: planConfig.name,
+        publishedCount: publishedCount,
+        publishLimit: planConfig.maxPublishedSites,
+        upgradeRequired: true
+      });
+    }
+
     await supabaseRequest('PATCH', 'sites?id=eq.'+siteId+'&user_id=eq.'+userId, {published: true, updated_at: new Date().toISOString()});
+    console.log('[Publish] Site', siteId, 'published by user', userId, '| plan:', plan);
     return json(res, 200, {success: true});
   }
 
@@ -767,7 +945,18 @@ const server = http.createServer(async (req, res) => {
   // ── CHECKOUT ──────────────────────────────────────────────────────────────────
   if (p === '/api/create-checkout' && req.method === 'POST') {
     const body = JSON.parse(await readBody(req));
-    const {priceId,userId,userEmail,siteId} = body;
+    // Accept either priceId (legacy) or plan key ('starter','business','agency')
+    let { priceId, plan, userId, userEmail, siteId } = body;
+
+    // If caller sends a plan key, resolve it to a Stripe price ID
+    if (!priceId && plan) {
+      const normalizedPlan = normalizePlan(plan);
+      priceId = STRIPE_PRICES[normalizedPlan];
+      if (!priceId || priceId.startsWith('price_REPLACE')) {
+        return json(res,500,{error:'Stripe price ID not configured for this plan. Please contact support at hello@clientmint.co'});
+      }
+    }
+
     if (!priceId||!userId) return json(res,400,{error:'Missing priceId or userId'});
     if (!process.env.STRIPE_SECRET_KEY) return json(res,500,{error:'Stripe is not configured yet. Please contact support at hello@clientmint.co'});
     try {
@@ -776,20 +965,20 @@ const server = http.createServer(async (req, res) => {
         'line_items[0][price]':priceId,'line_items[0][quantity]':'1',
         'success_url':DOMAIN+'/success?session_id={CHECKOUT_SESSION_ID}&site_id='+(siteId||''),
         'cancel_url':DOMAIN+'/pricing',
-        'metadata[user_id]':userId,'metadata[site_id]':siteId||'',
+        'metadata[user_id]':userId,'metadata[site_id]':siteId||'','metadata[plan]':plan||'',
         'allow_promotion_codes':'true'
       };
       if (userEmail) params['customer_email']=userEmail;
       const session = await stripeRequest('POST','checkout/sessions',params);
       if (session.status!==200) {
         const errMsg = session.data?.error?.message || 'Stripe returned status '+session.status;
-        console.error('Stripe checkout error:', JSON.stringify(session.data));
+        console.error('[Checkout] Stripe error:', JSON.stringify(session.data));
         return json(res,500,{error:'Payment setup failed: '+errMsg});
       }
       if (!session.data?.url) return json(res,500,{error:'Stripe did not return a checkout URL. Check your Stripe price IDs.'});
       return json(res,200,{url:session.data.url});
     } catch(e) {
-      console.error('Checkout exception:', e.message);
+      console.error('[Checkout] Exception:', e.message);
       return json(res,500,{error:'Checkout failed: '+e.message});
     }
   }
@@ -817,35 +1006,71 @@ const server = http.createServer(async (req, res) => {
       const sid = s.metadata?.site_id;
       const subId = s.subscription;
       const custId = s.customer;
-      const amt = s.amount_subtotal||0;
-      let plan = amt>=4900?'agency':amt>=2400?'business':'pro';
-      console.log('[Webhook] checkout.session.completed — plan:', plan, '| has uid:', !!uid, '| has sid:', !!sid);
+      // Prefer plan from metadata (set at checkout time), fall back to amount
+      let plan = normalizePlan(s.metadata?.plan);
+      if (!plan || plan === 'free') {
+        const amt = s.amount_subtotal||0;
+        plan = amt>=4900?'agency':amt>=2400?'business':'starter';
+      }
+      const now = new Date().toISOString();
+      console.log('[Webhook] checkout.session.completed — userId:', uid, '| plan:', plan, '| sub:', subId);
+
+      // Update the profiles table (source of truth for user plan)
+      if (uid) {
+        const profilePatch = {
+          plan, stripe_customer_id: custId, stripe_subscription_id: subId,
+          ai_edits_used: 0, ai_edits_reset_at: now, updated_at: now
+        };
+        const pr = await supabaseRequest('PATCH','profiles?user_id=eq.'+uid, profilePatch);
+        if (pr.status !== 200 && pr.status !== 204) {
+          // Profile row might not exist yet — try to insert it
+          await supabaseRequest('POST','profiles',{user_id:uid,...profilePatch});
+          console.log('[Webhook] Created new profile row for user:', uid);
+        } else {
+          console.log('[Webhook] Updated profile for user:', uid, '→ plan:', plan);
+        }
+      }
+
+      // Also update the site row if we have one
       if (sid) {
-        await supabaseRequest('PATCH','sites?id=eq.'+sid,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:new Date().toISOString()});
+        await supabaseRequest('PATCH','sites?id=eq.'+sid,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:now});
       } else if (uid) {
         const r = await supabaseRequest('GET','sites?user_id=eq.'+uid+'&order=created_at.desc&limit=1');
         if (r.data&&r.data[0]) {
-          await supabaseRequest('PATCH','sites?id=eq.'+r.data[0].id,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:new Date().toISOString()});
-          console.log('[Webhook] Updated site', r.data[0].id, 'to plan:', plan);
-        } else {
-          console.warn('[Webhook] checkout.session.completed — no site found for user_id:', uid);
+          await supabaseRequest('PATCH','sites?id=eq.'+r.data[0].id,{published:true,plan,stripe_customer_id:custId,stripe_subscription_id:subId,updated_at:now});
+          console.log('[Webhook] Published site', r.data[0].id, 'on plan:', plan);
         }
-      } else {
-        console.warn('[Webhook] checkout.session.completed — no user_id or site_id in metadata');
       }
     }
+
     if (evt.type === 'customer.subscription.deleted') {
       const subId = evt.data.object.id;
+      const custId = evt.data.object.customer;
+      const now = new Date().toISOString();
       console.log('[Webhook] customer.subscription.deleted — subscription:', subId);
-      await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+subId,{published:false,plan:'free',updated_at:new Date().toISOString()});
+      // Downgrade profile to free
+      await supabaseRequest('PATCH','profiles?stripe_subscription_id=eq.'+subId,{
+        plan:'free', stripe_subscription_id: null, updated_at: now
+      });
+      // Also by customer ID if subscription match fails
+      if (custId) {
+        await supabaseRequest('PATCH','profiles?stripe_customer_id=eq.'+custId,{
+          plan:'free', stripe_subscription_id: null, updated_at: now
+        });
+      }
+      await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+subId,{published:false,plan:'free',updated_at:now});
     }
+
     if (evt.type === 'customer.subscription.updated') {
       const sub = evt.data.object;
+      const now = new Date().toISOString();
       console.log('[Webhook] customer.subscription.updated — status:', sub.status, '| subscription:', sub.id);
       if (sub.status === 'active') {
         const amt = sub.items?.data?.[0]?.price?.unit_amount || 0;
-        const plan = amt>=4900?'agency':amt>=2400?'business':'pro';
-        await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+sub.id,{plan,updated_at:new Date().toISOString()});
+        const plan = amt>=4900?'agency':amt>=2400?'business':'starter';
+        await supabaseRequest('PATCH','profiles?stripe_subscription_id=eq.'+sub.id,{plan,updated_at:now});
+        await supabaseRequest('PATCH','sites?stripe_subscription_id=eq.'+sub.id,{plan,updated_at:now});
+        console.log('[Webhook] Updated plan to:', plan, 'for subscription:', sub.id);
       }
     }
     return json(res,200,{received:true});
