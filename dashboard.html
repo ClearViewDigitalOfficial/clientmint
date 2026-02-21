@@ -323,7 +323,8 @@
     const date = new Date(site.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const status = site.published ? '<span class="pill live">● Live</span>' : '<span class="pill draft">○ Draft</span>';
     const planPill = site.plan && site.plan !== 'free' ? `<span class="pill ${site.plan}">${cap(site.plan)}</span>` : '';
-    const liveUrl = `${window.location.origin}/site/${site.slug}`;
+    const origin = window.location.origin.includes('localhost') ? window.location.origin : 'https://clientmint.onrender.com';
+    const liveUrl = `${origin}/site/${site.slug}`;
 
     const pubBtn = !site.published
       ? `<button class="abtn pub" onclick="pubSite('${site.id}')">🚀 Publish</button>`
@@ -354,7 +355,27 @@
   }
 
   function openEditor(id) { window.location.href = '/?edit=' + id; }
-  function pubSite(id) { sessionStorage.setItem('pendingSiteId', id); window.location.href = '/pricing'; }
+  async function pubSite(id) {
+    try {
+      const res = await fetch('/api/publish-site', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({siteId: id, userId: currentUser.id})
+      });
+      const data = await res.json();
+      if (res.status === 403 && data.upgradeRequired) {
+        sessionStorage.setItem('pendingSiteId', id);
+        window.location.href = '/pricing';
+      } else if (data.success) {
+        toast('Site published! 🎉 It is now live.');
+        await loadDashboard();
+      } else {
+        toast(data.error || 'Publish failed', 'error');
+      }
+    } catch(e) {
+      sessionStorage.setItem('pendingSiteId', id);
+      window.location.href = '/pricing';
+    }
+  }
 
   function copyUrl(url) {
     navigator.clipboard.writeText(url).then(() => toast('Link copied! ✅')).catch(() => {
