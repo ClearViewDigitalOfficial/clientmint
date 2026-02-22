@@ -64,7 +64,11 @@ async function signOut() {
 }
 
 async function loadSiteForEditing(siteId) {
-  if (!currentUser) return;
+  // If no user yet, wait a moment for auth then retry
+  if (!currentUser) {
+    setTimeout(() => loadSiteForEditing(siteId), 1500);
+    return;
+  }
   try {
     const { data } = await supabaseClient.from('sites').select('*').eq('id', siteId).eq('user_id', currentUser.id).single();
     if (data) {
@@ -264,7 +268,8 @@ function startProgressAnimation() {
 function showEditor() {
   document.getElementById('loadingScreen').classList.remove('active');
   document.getElementById('editorScreen').classList.add('active');
-  setTimeout(() => displayGeneratedWebsite(), 200);
+  displayGeneratedWebsite();
+  setTimeout(() => displayGeneratedWebsite(), 400);
   loadEditUsage();
 }
 
@@ -301,30 +306,52 @@ async function generateWebsiteWithAI() {
 function displayGeneratedWebsite() {
   const iframe = document.getElementById('previewFrame');
   if (!userData.generatedHTML) return;
-  const doc = iframe.contentWindow.document;
-  doc.open(); doc.write(userData.generatedHTML); doc.close();
 
-  function forceVisible() {
-    try {
-      const iDoc = iframe.contentWindow.document;
-      if (!iDoc || !iDoc.head) return;
-      let style = iDoc.getElementById('cm-force-visible');
-      if (!style) {
-        style = iDoc.createElement('style');
-        style.id = 'cm-force-visible';
-        style.textContent = `
-          .fade-in,[class*='fade'],[class*='animate'],[class*='hidden'],[class*='invisible']{opacity:1!important;transform:none!important;visibility:visible!important}
-          *{animation-play-state:running!important}
-        `;
-        iDoc.head.appendChild(style);
-      }
-      iDoc.querySelectorAll('[class*="fade"]').forEach(el => el.classList.add('visible','show','in-view','active'));
-    } catch(e) {}
+  // Inject the force-visible style BEFORE writing, by prepending it into the HTML.
+  // This is the reliable fix: no race condition with onload, no timing issues.
+  const forceVisibleStyle = `<style id="cm-force-visible">
+    .fade-in,[class*="fade"],[class*="animate"],[class*="hidden"],[class*="invisible"]{
+      opacity:1!important;transform:none!important;visibility:visible!important;transition:none!important;
+    }
+    *{animation-play-state:running!important}
+  </style>`;
+
+  // Insert right after <head> or <html> tag so it loads first
+  let html = userData.generatedHTML;
+  if (html.includes('<head>')) {
+    html = html.replace('<head>', '<head>' + forceVisibleStyle);
+  } else if (html.includes('<head ')) {
+    html = html.replace(/<head([^>]*)>/, '<head$1>' + forceVisibleStyle);
+  } else {
+    html = forceVisibleStyle + html;
   }
-  iframe.onload = () => { forceVisible(); setTimeout(forceVisible, 500); };
-  setTimeout(forceVisible, 300);
-  setTimeout(forceVisible, 1200);
-  setTimeout(forceVisible, 2500);
+
+  // Also inject a script at the end to add 'visible' class to all fade-in elements
+  const forceVisibleScript = `<script>
+    (function(){
+      function runForceVisible(){
+        document.querySelectorAll('[class*="fade"],[class*="animate"]').forEach(function(el){
+          el.classList.add('visible','show','in-view','active');
+          el.style.opacity='1';
+          el.style.transform='none';
+          el.style.visibility='visible';
+        });
+      }
+      if(document.readyState==='loading'){
+        document.addEventListener('DOMContentLoaded',runForceVisible);
+      } else {
+        runForceVisible();
+      }
+      setTimeout(runForceVisible,200);
+      setTimeout(runForceVisible,800);
+      setTimeout(runForceVisible,2000);
+    })();
+  </script>`;
+  html = html.replace('</body>', forceVisibleScript + '</body>');
+  if (!html.includes('</body>')) html += forceVisibleScript;
+
+  // Use srcdoc which is more reliable than doc.write for iframes
+  iframe.srcdoc = html;
 }
 
 // AI EDITING
